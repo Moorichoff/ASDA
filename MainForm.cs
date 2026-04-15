@@ -6,7 +6,10 @@ using Microsoft.Web.WebView2.WinForms;
 using Microsoft.Web.WebView2.Core;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Text;
+using System.Net.Http;
 
 namespace SteamGuard
 {
@@ -19,6 +22,7 @@ namespace SteamGuard
         private ConfirmationService? _confirmationService;
         private TradeService? _tradeService;
         private MarketService? _marketService;
+        private AutoConfirmationService? _autoConfirmationService;
         private System.Windows.Forms.Timer? _codeTimer;
         private int _timeLeft = 30;
         private readonly string _mafileDirectory;
@@ -37,6 +41,10 @@ namespace SteamGuard
             _accountManager = new AccountManager(_mafileDirectory);
             _accountManager.LoadAccounts();
             _settingsManager = new SettingsManager();
+
+            // Инициализируем сервис автоподтверждения
+            _autoConfirmationService = new AutoConfirmationService(_accountManager, _settingsManager);
+            _autoConfirmationService.Start();
 
             InitializeCodeTimer();
         }
@@ -288,7 +296,10 @@ namespace SteamGuard
 
                     case "CopyRevocationCode":
                         string revCode = message?["code"]?.ToString() ?? "";
-                        Clipboard.SetText(revCode);
+                        if (!string.IsNullOrEmpty(revCode))
+                        {
+                            this.Invoke(() => Clipboard.SetText(revCode));
+                        }
                         break;
 
                     case "GetGroups":
@@ -371,7 +382,7 @@ namespace SteamGuard
                 hasSession = a.HasSession,
                 autoTrade = a.AutoTrade,
                 autoMarket = a.AutoMarket,
-                hasProxy = a.Proxy != null,
+                hasProxy = a.Proxy != null || !string.IsNullOrEmpty(_settingsManager.Settings.GlobalProxy),
                 isFavorite = a.IsFavorite,
                 steamId = a.SteamId.ToString()
             }).ToList();
@@ -426,10 +437,11 @@ namespace SteamGuard
             {
                 _confirmationService = new ConfirmationService(
                     _accountManager.CurrentAccount,
-                    _authenticator);
+                    _authenticator,
+                    _settingsManager);
 
-                _tradeService = new TradeService(_accountManager.CurrentAccount);
-                _marketService = new MarketService(_accountManager.CurrentAccount);
+                _tradeService = new TradeService(_accountManager.CurrentAccount, _settingsManager);
+                _marketService = new MarketService(_accountManager.CurrentAccount, _settingsManager);
             }
         }
 
@@ -578,7 +590,7 @@ namespace SteamGuard
 
                         // Пересоздаем сервис с новой сессией
                         _confirmationService?.Dispose();
-                        _confirmationService = new ConfirmationService(account, _authenticator);
+                        _confirmationService = new ConfirmationService(account, _authenticator, _settingsManager);
 
                         // Повторяем запрос
                         var confirmations = await _confirmationService.GetConfirmationsAsync();
@@ -620,7 +632,7 @@ namespace SteamGuard
             try
             {
                 var confirmations = await _confirmationService.GetConfirmationsAsync();
-                var confirmation = confirmations.FirstOrDefault(c => c.Id == confirmationId);
+                var confirmation = confirmations.FirstOrDefault(c => c.Id.ToString() == confirmationId);
 
                 if (confirmation != null)
                 {
@@ -641,7 +653,7 @@ namespace SteamGuard
             try
             {
                 var confirmations = await _confirmationService.GetConfirmationsAsync();
-                var confirmation = confirmations.FirstOrDefault(c => c.Id == confirmationId);
+                var confirmation = confirmations.FirstOrDefault(c => c.Id.ToString() == confirmationId);
 
                 if (confirmation != null)
                 {
@@ -823,9 +835,34 @@ namespace SteamGuard
                 // Обновляем прокси
                 string proxyStr = message["proxy"]?.ToString() ?? "";
                 AppLogger.Info($"Proxy string received: '{proxyStr}'");
-                if (!string.IsNullOrEmpty(proxyStr))
+
+                if (!string.IsNullOrEmpty(proxyStr) && proxyStr != "Без прокси")
                 {
-                    var parts = proxyStr.Split(':');
+                    string proxyAddress = proxyStr;
+                    string? proxyUsername = null;
+                    string? proxyPassword = null;
+
+                    // Проверяем, это адрес или название прокси
+                    if (!proxyStr.Contains(":") || !int.TryParse(proxyStr.Split(':').Last(), out _))
+                    {
+                        // Это название прокси, ищем в настройках
+                        var proxySettings = _settingsManager.Settings.Proxies.FirstOrDefault(p => p.Name == proxyStr);
+                        if (proxySettings != null && !string.IsNullOrEmpty(proxySettings.Address))
+                        {
+                            proxyAddress = proxySettings.Address;
+                            proxyUsername = proxySettings.Username;
+                            proxyPassword = proxySettings.Password;
+                        }
+                        else
+                        {
+                            AppLogger.Warn($"Proxy '{proxyStr}' not found in settings");
+                            account.Proxy = null;
+                            goto SaveAccount;
+                        }
+                    }
+
+                    // Парсим адрес прокси
+                    var parts = proxyAddress.Split(':');
                     if (parts.Length >= 2 && int.TryParse(parts[1], out int port))
                     {
                         account.Proxy = new MaFileProxy
@@ -836,12 +873,17 @@ namespace SteamGuard
                                 Protocol = 0,
                                 Address = parts[0],
                                 Port = port,
-                                Username = null,
-                                Password = null,
-                                AuthEnabled = false
+                                Username = proxyUsername,
+                                Password = proxyPassword,
+                                AuthEnabled = !string.IsNullOrEmpty(proxyUsername)
                             }
                         };
                         AppLogger.Debug($"Proxy set for {accountName}: {parts[0]}:{port}");
+                    }
+                    else
+                    {
+                        AppLogger.Warn($"Invalid proxy address format: {proxyAddress}");
+                        account.Proxy = null;
                     }
                 }
                 else
@@ -850,8 +892,15 @@ namespace SteamGuard
                     AppLogger.Debug($"Proxy removed for {accountName}");
                 }
 
+                SaveAccount:
+
                 _accountManager.SaveAccountSettings(account);
                 UpdateAccountsList();
+
+                // Перезапускаем сервис автоподтверждения для применения изменений
+                _autoConfirmationService?.Stop();
+                _autoConfirmationService?.Start();
+
                 SendToJS("AccountSettingsSaved", new { success = true, message = "Настройки сохранены" });
             }
             catch (Exception ex)
@@ -875,7 +924,7 @@ namespace SteamGuard
         /// <summary>
         /// Обработать логин/пароль
         /// </summary>
-        private void HandleLoginCredentials(Dictionary<string, object> message)
+        private async void HandleLoginCredentials(Dictionary<string, object> message)
         {
             try
             {
@@ -883,12 +932,40 @@ namespace SteamGuard
                 string password = message["password"]?.ToString() ?? "";
                 string group = message["group"]?.ToString() ?? _settingsManager.Settings.DefaultGroup;
 
-                // Здесь должна быть реальная авторизация через Steam API
-                // Пока заглушка - запрашиваем код с почты
-                SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
+                {
+                    SendToJS("Error", new { message = "Логин и пароль не могут быть пустыми" });
+                    return;
+                }
+
+                // Сохраняем данные для последующих шагов
+                _newAccountLogin = login;
+                _newAccountPassword = password;
+                _newAccountGroup = group;
+                _accountLinker = new SteamGuardEnrollment();
+
+                // Начинаем авторизацию
+                var (success, error, needsEmailCode, confirmType) = await _accountLinker.StartLoginAsync(login, password);
+
+                if (!success)
+                {
+                    SendToJS("Error", new { message = $"Ошибка авторизации: {error}" });
+                    return;
+                }
+
+                // Запрашиваем код с почты или email
+                if (needsEmailCode || confirmType == (int)AuthConfirmationType.EmailCode || confirmType == (int)AuthConfirmationType.EmailConfirmation)
+                {
+                    SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                }
+                else
+                {
+                    SendToJS("Error", new { message = $"Неподдерживаемый тип подтверждения: {confirmType}" });
+                }
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Error in HandleLoginCredentials", ex);
                 SendToJS("Error", new { message = ex.Message });
             }
         }
@@ -896,7 +973,7 @@ namespace SteamGuard
         /// <summary>
         /// Обработать код с почты для авторизации
         /// </summary>
-        private void HandleEmailCode(Dictionary<string, object> message)
+        private async void HandleEmailCode(Dictionary<string, object> message)
         {
             try
             {
@@ -909,12 +986,52 @@ namespace SteamGuard
                     return;
                 }
 
-                // Здесь должна быть проверка кода
-                // После успешной проверки - запрашиваем код для Steam Guard
-                SendToJS("RequestGuardCode", new { message = "Введите код для подключения Steam Guard" });
+                // Если это добавление нового аккаунта
+                if (_accountLinker != null)
+                {
+                    // Подтверждаем email код
+                    var (emailSuccess, emailError) = await _accountLinker.SubmitEmailCodeAsync(code);
+
+                    if (!emailSuccess)
+                    {
+                        SendToJS("Error", new { message = $"Ошибка подтверждения email: {emailError}" });
+                        return;
+                    }
+
+                    // Добавляем аутентификатор
+                    var (success, error, sharedSecret, revocationCode, uri, serverTime, tokenGid, identitySecret, secret1, confirmType)
+                        = await _accountLinker.AddAuthenticatorAsync();
+
+                    if (!success)
+                    {
+                        SendToJS("Error", new { message = $"Не удалось добавить аутентификатор: {error}" });
+                        return;
+                    }
+
+                    // Сохраняем данные аутентификатора
+                    _newAccountAuthData = new AddAuthenticatorResult
+                    {
+                        SharedSecret = sharedSecret ?? "",
+                        IdentitySecret = identitySecret,
+                        RevocationCode = revocationCode ?? "",
+                        Uri = uri ?? "",
+                        ServerTime = serverTime,
+                        TokenGid = tokenGid ?? "",
+                        Secret1 = secret1,
+                        ConfirmType = confirmType
+                    };
+
+                    // Запрашиваем код подтверждения
+                    SendToJS("RequestGuardCode", new { message = "Введите код подтверждения (SMS или Email)" });
+                }
+                else
+                {
+                    SendToJS("Error", new { message = "Ошибка: нет данных для авторизации" });
+                }
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Error in HandleEmailCode", ex);
                 SendToJS("Error", new { message = ex.Message });
             }
         }
@@ -922,25 +1039,40 @@ namespace SteamGuard
         /// <summary>
         /// Обработать код для Steam Guard
         /// </summary>
-        private void HandleGuardCode(Dictionary<string, object> message)
+        private async void HandleGuardCode(Dictionary<string, object> message)
         {
             try
             {
-                string code = message["code"]?.ToString() ?? "";
-                string login = message["login"]?.ToString() ?? "";
-                string password = message["password"]?.ToString() ?? "";
-                string group = message["group"]?.ToString() ?? _settingsManager.Settings.DefaultGroup;
+                string confirmationCode = message["code"]?.ToString() ?? "";
 
-                // Генерируем заглушку R-кода
-                string revocationCode = GenerateRevocationCode();
+                if (_accountLinker == null || _newAccountAuthData == null)
+                {
+                    SendToJS("Error", new { message = "Ошибка: нет данных аутентификатора" });
+                    return;
+                }
 
-                // Создаем аккаунт
+                // Финализируем аутентификатор
+                var (success, error) = await _accountLinker.FinalizeAuthenticatorAsync(confirmationCode);
+
+                if (!success)
+                {
+                    SendToJS("Error", new { message = $"Не удалось финализировать аутентификатор: {error}" });
+                    return;
+                }
+
+                // Создаем аккаунт с реальными данными
                 var newAccount = new SteamAccount
                 {
-                    Username = login,
-                    Group = group,
-                    HasSession = true,
-                    RevocationCode = revocationCode
+                    Username = _newAccountLogin ?? "",
+                    Group = _newAccountGroup ?? _settingsManager.Settings.DefaultGroup,
+                    SharedSecret = _newAccountAuthData.SharedSecret ?? "",
+                    IdentitySecret = _newAccountAuthData.IdentitySecret != null
+                        ? Convert.ToBase64String(_newAccountAuthData.IdentitySecret)
+                        : "",
+                    RevocationCode = _newAccountAuthData.RevocationCode ?? "",
+                    SteamId = (long)_accountLinker.SteamId,
+                    DeviceId = _accountLinker.DeviceId,
+                    HasSession = true
                 };
 
                 _accountManager.AddAccount(newAccount);
@@ -949,13 +1081,22 @@ namespace SteamGuard
                 // Показываем R-код
                 SendToJS("ShowRevocationCode", new
                 {
-                    code = revocationCode,
+                    code = newAccount.RevocationCode,
                     account = newAccount.Username,
-                    message = "Сохраните этот код! Он необходим для восстановления аккаунта."
+                    message = "Аккаунт успешно добавлен! Сохраните R-код для восстановления."
                 });
+
+                // Очищаем временные данные
+                _accountLinker?.Dispose();
+                _accountLinker = null;
+                _newAccountLogin = null;
+                _newAccountPassword = null;
+                _newAccountGroup = null;
+                _newAccountAuthData = null;
             }
             catch (Exception ex)
             {
+                AppLogger.Error("Error in HandleGuardCode", ex);
                 SendToJS("Error", new { message = ex.Message });
             }
         }
@@ -1039,7 +1180,8 @@ namespace SteamGuard
                 string defaultGroup = message["defaultGroup"]?.ToString() ?? "";
                 bool auto2FA = Convert.ToBoolean(message["auto2FA"] ?? false);
 
-                _settingsManager.SetDefaultGroup(defaultGroup);
+                // Обновляем все настройки перед сохранением
+                _settingsManager.Settings.DefaultGroup = defaultGroup;
                 _settingsManager.Settings.Auto2FA = auto2FA;
 
                 // Handle proxies
@@ -1055,10 +1197,19 @@ namespace SteamGuard
                         .ToList();
 
                     AppLogger.Info($"Proxies count after deserialization and filtering: {_settingsManager.Settings.Proxies.Count}");
+
+                    // Устанавливаем GlobalProxy на основе активного прокси
+                    var activeProxy = _settingsManager.Settings.Proxies.FirstOrDefault(p => p.IsActive);
+                    _settingsManager.Settings.GlobalProxy = activeProxy?.Name;
                 }
 
+                // Сохраняем все настройки одним вызовом
                 _settingsManager.SaveSettings();
                 AppLogger.Info("Settings saved successfully");
+
+                // Обновляем список аккаунтов чтобы индикаторы прокси обновились
+                UpdateAccountsList();
+
                 SendToJS("SettingsSaved", new { success = true, message = "Настройки сохранены" });
             }
             catch (Exception ex)
@@ -1180,6 +1331,13 @@ namespace SteamGuard
         // Аккаунт ожидающий ввода email кода
         private string? _pendingLoginAccount;
 
+        // Данные для добавления нового аккаунта
+        private SteamGuardEnrollment? _accountLinker;
+        private string? _newAccountLogin;
+        private string? _newAccountPassword;
+        private string? _newAccountGroup;
+        private AddAuthenticatorResult? _newAccountAuthData;
+
         /// <summary>
         /// Обработать код с почты для авторизации (при обновлении сессии)
         /// </summary>
@@ -1255,6 +1413,7 @@ namespace SteamGuard
         {
             _codeTimer?.Stop();
             _codeTimer?.Dispose();
+            _autoConfirmationService?.Dispose();
             _confirmationService?.Dispose();
             base.OnFormClosing(e);
         }

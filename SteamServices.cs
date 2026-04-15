@@ -26,59 +26,6 @@ namespace SteamGuard
     }
 
     /// <summary>
-    /// Тип подтверждения
-    /// </summary>
-    public enum ConfirmationType
-    {
-        Trade = 1,
-        MarketListing = 2,
-        Login = 3,
-        General = 4
-    }
-
-    /// <summary>
-    /// Модель подтверждения
-    /// </summary>
-    public class Confirmation
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; } = string.Empty;
-
-        [JsonProperty("nonce")]
-        public string Nonce { get; set; } = string.Empty;
-
-        [JsonProperty("type")]
-        public int Type { get; set; }
-
-        [JsonProperty("type_name")]
-        public string TypeName { get; set; } = string.Empty;
-
-        [JsonProperty("creator_id")]
-        public string CreatorId { get; set; } = string.Empty;
-
-        [JsonProperty("headline")]
-        public string Headline { get; set; } = string.Empty;
-
-        [JsonProperty("creation_time")]
-        public long CreationTime { get; set; }
-
-        [JsonProperty("cancel")]
-        public string CancelText { get; set; } = string.Empty;
-
-        [JsonProperty("accept")]
-        public string AcceptText { get; set; } = string.Empty;
-
-        [JsonProperty("icon")]
-        public string IconUrl { get; set; } = string.Empty;
-
-        [JsonProperty("multi")]
-        public bool Multi { get; set; }
-
-        public ConfirmationType ConfirmationType => (ConfirmationType)Type;
-        public DateTime CreationDateTime => DateTimeOffset.FromUnixTimeSeconds(CreationTime).LocalDateTime;
-    }
-
-    /// <summary>
     /// Сервис для работы с подтверждениями Steam
     /// </summary>
     public class ConfirmationService : IDisposable
@@ -87,11 +34,11 @@ namespace SteamGuard
         private readonly SteamAccount _account;
         private readonly SteamAuthenticator _authenticator;
 
-        public ConfirmationService(SteamAccount account, SteamAuthenticator authenticator)
+        public ConfirmationService(SteamAccount account, SteamAuthenticator authenticator, SettingsManager? settingsManager = null)
         {
             _account = account ?? throw new ArgumentNullException(nameof(account));
             _authenticator = authenticator ?? throw new ArgumentNullException(nameof(authenticator));
-            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account);
+            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account, settingsManager);
             _httpClient.BaseAddress = new Uri(Constants.SteamCommunityUrl);
         }
 
@@ -122,7 +69,7 @@ namespace SteamGuard
                         var confirmation = conf?.ToObject<Confirmation>();
                         if (confirmation != null)
                         {
-                            AppLogger.Debug($"Подтверждение: id={confirmation.Id}, type={confirmation.Type}, headline={confirmation.Headline}");
+                            AppLogger.Debug($"Подтверждение: id={confirmation.Id}, type={confirmation.IntType}, headline={confirmation.Headline}");
                             confirmations.Add(confirmation);
                         }
                     }
@@ -289,10 +236,10 @@ namespace SteamGuard
         private readonly HttpClient _httpClient;
         private readonly SteamAccount _account;
 
-        public TradeService(SteamAccount account)
+        public TradeService(SteamAccount account, SettingsManager? settingsManager = null)
         {
             _account = account;
-            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account);
+            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account, settingsManager);
         }
 
         /// <summary>
@@ -602,10 +549,10 @@ namespace SteamGuard
         private readonly HttpClient _httpClient;
         private readonly SteamAccount _account;
 
-        public MarketService(SteamAccount account)
+        public MarketService(SteamAccount account, SettingsManager? settingsManager = null)
         {
             _account = account;
-            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account);
+            _httpClient = SteamHttpClientFactory.CreateAuthenticatedClient(account, settingsManager);
         }
 
         /// <summary>

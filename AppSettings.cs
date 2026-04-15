@@ -19,6 +19,11 @@ namespace SteamGuard
         public bool Auto2FA { get; set; } = false;
 
         /// <summary>
+        /// Глобальный прокси (применяется ко всем аккаунтам без своего прокси)
+        /// </summary>
+        public string? GlobalProxy { get; set; } = null;
+
+        /// <summary>
         /// Список прокси
         /// </summary>
         public List<ProxySettings> Proxies { get; set; } = new List<ProxySettings>();
@@ -118,24 +123,6 @@ namespace SteamGuard
         {
             _settings.Proxies.RemoveAll(p => p.Name == name);
             SaveSettings();
-        }
-
-        public void UpdateProxy(ProxySettings proxy)
-        {
-            var existing = _settings.Proxies.FirstOrDefault(p => p.Name == proxy.Name);
-            if (existing != null)
-            {
-                existing.Address = proxy.Address;
-                existing.Username = proxy.Username;
-                existing.Password = proxy.Password;
-                existing.IsActive = proxy.IsActive;
-                SaveSettings();
-            }
-        }
-
-        public ProxySettings? GetActiveProxy()
-        {
-            return _settings.Proxies.FirstOrDefault(p => p.IsActive);
         }
     }
 }

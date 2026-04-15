@@ -22,10 +22,63 @@ namespace SteamGuard
         /// <summary>
         /// Создать HttpClient с cookies для аутентифицированных запросов
         /// </summary>
-        public static HttpClient CreateAuthenticatedClient(SteamAccount account)
+        public static HttpClient CreateAuthenticatedClient(SteamAccount account, SettingsManager? settingsManager = null)
         {
             var handler = new HttpClientHandler();
             var cookieContainer = new CookieContainer();
+
+            // Определяем какой прокси использовать
+            MaFileProxy? proxyToUse = account.Proxy;
+
+            // Если у аккаунта нет своего прокси, проверяем глобальный
+            if (proxyToUse == null && settingsManager != null && !string.IsNullOrEmpty(settingsManager.Settings.GlobalProxy))
+            {
+                var globalProxyName = settingsManager.Settings.GlobalProxy;
+                var globalProxySettings = settingsManager.Settings.Proxies.FirstOrDefault(p => p.Name == globalProxyName);
+
+                if (globalProxySettings != null && !string.IsNullOrEmpty(globalProxySettings.Address))
+                {
+                    var parts = globalProxySettings.Address.Split(':');
+                    if (parts.Length >= 2 && int.TryParse(parts[1], out int port))
+                    {
+                        proxyToUse = new MaFileProxy
+                        {
+                            Id = 1,
+                            Data = new ProxyData
+                            {
+                                Protocol = 0,
+                                Address = parts[0],
+                                Port = port,
+                                Username = globalProxySettings.Username,
+                                Password = globalProxySettings.Password,
+                                AuthEnabled = !string.IsNullOrEmpty(globalProxySettings.Username)
+                            }
+                        };
+                        AppLogger.Debug($"Using global proxy: {parts[0]}:{port}");
+                    }
+                }
+            }
+
+            // Настройка прокси
+            if (proxyToUse?.Data != null && !string.IsNullOrEmpty(proxyToUse.Data.Address))
+            {
+                var proxyUri = new Uri($"http://{proxyToUse.Data.Address}:{proxyToUse.Data.Port}");
+                handler.Proxy = new WebProxy(proxyUri);
+                handler.UseProxy = true;
+
+                // Если есть авторизация для прокси
+                if (proxyToUse.Data.AuthEnabled &&
+                    !string.IsNullOrEmpty(proxyToUse.Data.Username) &&
+                    !string.IsNullOrEmpty(proxyToUse.Data.Password))
+                {
+                    handler.Proxy.Credentials = new NetworkCredential(
+                        proxyToUse.Data.Username,
+                        proxyToUse.Data.Password
+                    );
+                }
+
+                AppLogger.Debug($"Using proxy: {proxyToUse.Data.Address}:{proxyToUse.Data.Port}");
+            }
 
             if (!string.IsNullOrEmpty(account.Session?.SessionId))
             {

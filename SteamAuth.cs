@@ -242,10 +242,8 @@ namespace SteamGuard
         [Newtonsoft.Json.JsonIgnore]
         public bool HasSession { get; set; } = false;
 
-        [Newtonsoft.Json.JsonIgnore]
         public bool AutoTrade { get; set; } = false;
 
-        [Newtonsoft.Json.JsonIgnore]
         public bool AutoMarket { get; set; } = false;
     }
 
@@ -376,7 +374,9 @@ namespace SteamGuard
         private void SaveMaFile(SteamAccount account)
         {
             string maFilePath = Path.Combine(_mafileDirectory, $"{account.Username}.mafile");
-            
+
+            AppLogger.Info($"Saving account {account.Username}: AutoTrade={account.AutoTrade}, AutoMarket={account.AutoMarket}");
+
             // Создаём копию для сохранения (конвертируем "Без группы" → "none")
             var saveAccount = new SteamAccount
             {
@@ -401,11 +401,14 @@ namespace SteamGuard
                 Proxy = account.Proxy,
                 Group = account.Group == Constants.DefaultGroup ? Constants.DefaultGroupInternal : account.Group,
                 Password = account.Password,
-                IsFavorite = account.IsFavorite
+                IsFavorite = account.IsFavorite,
+                AutoTrade = account.AutoTrade,
+                AutoMarket = account.AutoMarket
             };
 
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(saveAccount, Newtonsoft.Json.Formatting.Indented);
             File.WriteAllText(maFilePath, json);
+            AppLogger.Info($"Account {account.Username} saved to {maFilePath}");
         }
 
         /// <summary>

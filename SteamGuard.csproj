@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.34.1" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="SteamKit2" Version="2.5.0" />

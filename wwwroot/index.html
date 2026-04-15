@@ -892,6 +892,38 @@
             background: rgba(140, 202, 102, 0.15);
         }
 
+        .modal-btn:disabled,
+        .modal-btn.loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .modal-btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .modal-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: button-spin 0.6s linear infinite;
+        }
+
+        @keyframes button-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .revocation-code {
             font-family: 'Courier New', monospace;
             font-size: 18px;
@@ -1686,10 +1718,6 @@
             <div class="modal-field">
                 <label>Аккаунт</label>
                 <input type="text" id="acc-settings-username" readonly>
-            </div>
-            <div class="modal-checkbox">
-                <input type="checkbox" id="acc-settings-session">
-                <label for="acc-settings-session">Обновить сессию</label>
             </div>
             <div class="modal-checkbox">
                 <input type="checkbox" id="acc-settings-auto-trade">
@@ -2501,6 +2529,9 @@
         }
 
         async function acceptAllConfirmations() {
+            const btn = document.getElementById('confirmations-accept-all');
+            setButtonLoading(btn, true);
+
             const confirmationItems = document.querySelectorAll('.confirmation-item');
             for (const item of confirmationItems) {
                 const confId = item.dataset.id;
@@ -2511,6 +2542,8 @@
                     await new Promise(resolve => setTimeout(resolve, 300));
                 }
             }
+
+            setButtonLoading(btn, false);
         }
 
         // ===== TRADES =====
@@ -2520,7 +2553,10 @@
         }
 
         function refreshTrades() {
+            const btn = event.target;
+            setButtonLoading(btn, true);
             window.chrome.webview.postMessage({ type: 'RefreshTrades' });
+            setTimeout(() => setButtonLoading(btn, false), 1000);
         }
 
         function acceptTrade(tradeId) {
@@ -2551,7 +2587,10 @@
         }
 
         function refreshMarket() {
+            const btn = event.target;
+            setButtonLoading(btn, true);
             window.chrome.webview.postMessage({ type: 'RefreshMarket' });
+            setTimeout(() => setButtonLoading(btn, false), 1000);
         }
 
         function cancelListing(listingId) {
@@ -2995,7 +3034,6 @@
             currentProxiesForAccount = data.proxies || [];
 
             document.getElementById('acc-settings-username').value = account.username;
-            document.getElementById('acc-settings-session').checked = account.hasSession;
             document.getElementById('acc-settings-auto-trade').checked = account.autoTrade;
             document.getElementById('acc-settings-auto-market').checked = account.autoMarket;
 
@@ -3035,6 +3073,9 @@
         }
 
         function saveAccountSettings() {
+            const btn = event.target;
+            setButtonLoading(btn, true);
+
             const selectedProxyName = getCustomSelectValue('acc-settings-proxy-select', 'acc-settings-proxy-text');
 
             // Находим адрес прокси по имени
@@ -3060,14 +3101,44 @@
                 autoMarket: document.getElementById('acc-settings-auto-market').checked,
                 proxy: proxyValue
             });
+
+            setTimeout(() => {
+                setButtonLoading(btn, false);
+                closeModal('modal-account-settings');
+            }, 500);
+        }
+
+        // ===== BUTTON LOADING STATE =====
+        function setButtonLoading(button, loading) {
+            if (loading) {
+                button.classList.add('loading');
+                button.disabled = true;
+                button.dataset.originalText = button.textContent;
+            } else {
+                button.classList.remove('loading');
+                button.disabled = false;
+                if (button.dataset.originalText) {
+                    button.textContent = button.dataset.originalText;
+                }
+            }
         }
 
         function refreshSession() {
-            if (!currentSettingsAccount) return;
+            const btn = event.target;
+            setButtonLoading(btn, true);
+
+            if (!currentSettingsAccount) {
+                setButtonLoading(btn, false);
+                return;
+            }
+
             window.chrome.webview.postMessage({
                 type: 'RefreshSession',
                 accountName: currentSettingsAccount
             });
+
+            // Снимаем загрузку через 2 секунды (или когда придет ответ)
+            setTimeout(() => setButtonLoading(btn, false), 2000);
         }
 
         // ===== ADD ACCOUNT MODAL =====
@@ -3100,6 +3171,8 @@
         }
 
         function addAccountNext() {
+            const btn = document.getElementById('add-account-next-btn');
+
             if (addAccountStep === 1) {
                 // Отправляем логин/пароль
                 addAccountData.login = document.getElementById('add-account-login').value;
@@ -3110,6 +3183,8 @@
                     showToast('Заполните все поля');
                     return;
                 }
+
+                setButtonLoading(btn, true);
 
                 window.chrome.webview.postMessage({
                     type: 'SubmitLoginCredentials',
@@ -3126,6 +3201,8 @@
                     return;
                 }
 
+                setButtonLoading(btn, true);
+
                 window.chrome.webview.postMessage({
                     type: 'SubmitEmailCode',
                     code: code
@@ -3138,6 +3215,8 @@
                     showToast('Введите код');
                     return;
                 }
+
+                setButtonLoading(btn, true);
 
                 window.chrome.webview.postMessage({
                     type: 'SubmitGuardCode',
@@ -3155,6 +3234,10 @@
 
         function setAddAccountStep(step, message) {
             addAccountStep = step;
+
+            // Снимаем загрузку с кнопки при смене шага
+            const btn = document.getElementById('add-account-next-btn');
+            setButtonLoading(btn, false);
 
             document.getElementById('add-account-step-login').style.display = step === 1 ? 'block' : 'none';
             document.getElementById('add-account-step-email').style.display = step === 2 ? 'block' : 'none';
@@ -3178,17 +3261,20 @@
             if (data.groups) {
                 setCustomSelect('settings-default-group-select', 'settings-default-group-text', 'settings-default-group-dropdown', data.groups, data.defaultGroup);
             }
-            
+
             // Set checkbox values
             document.getElementById('settings-auto-2fa').checked = data.auto2FA || false;
 
             // Render proxies
             renderProxies(data.proxies || []);
-            
+
             openModal('modal-settings');
         }
 
         function saveSettings() {
+            const btn = event.target;
+            setButtonLoading(btn, true);
+
             console.log('currentProxies before filter:', currentProxies);
             const proxies = currentProxies
                 .filter(p => p && p.name && p.name.trim() !== '' && p.address && p.address.trim() !== '')
@@ -3208,6 +3294,12 @@
                 auto2FA: document.getElementById('settings-auto-2fa').checked,
                 proxies: proxies
             });
+
+            // Снимаем загрузку и закрываем модалку через 500ms
+            setTimeout(() => {
+                setButtonLoading(btn, false);
+                closeModal('modal-settings');
+            }, 500);
         }
 
         let currentProxies = [];
@@ -3399,6 +3491,10 @@
 
             if (type === 'Error') {
                 showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                // Снимаем загрузку со всех кнопок при ошибке
+                document.querySelectorAll('.modal-btn.loading').forEach(btn => {
+                    setButtonLoading(btn, false);
+                });
             }
 
             // Новые типы сообщений
