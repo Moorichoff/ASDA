@@ -48,5 +48,22 @@ namespace SteamGuard
         public const string LogDirectory = "logs";
         public const string IconFileName = "app.ico";
         public const string IndexHtmlPath = "wwwroot/index.html";
+
+        // Mobile constants
+        public const string MobileUserAgent = "okhttp/3.12.12";
+        public const string MobileClientVersion = "777777 3.6.1";
+        public const string MobileClient = "android";
+        public const string MobileLanguage = "english";
+        public const string DeviceFriendlyName = "Pixel 6 Pro";
+        public const int DevicePlatformType = 3;
+        public const int DeviceOsType = -500;
+        public const uint DeviceGamingDeviceType = 528;
+
+        // API retry constants
+        public const int MaxPollAttempts = 30;
+        public const int MaxRetryAttempts = 3;
+
+        // Aliases
+        public const string CommunityUrl = SteamCommunityUrl;
     }
 }

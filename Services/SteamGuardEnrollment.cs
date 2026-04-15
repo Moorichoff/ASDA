@@ -45,11 +45,11 @@ public class SteamGuardEnrollment : IDisposable
         _cookies = _handler.CookieContainer;
         _http = new HttpClient(_handler, disposeHandler: false);
 
-        _http.DefaultRequestHeaders.Add("User-Agent", SteamApiConstants.MobileUserAgent);
+        _http.DefaultRequestHeaders.Add("User-Agent", Constants.MobileUserAgent);
         _http.DefaultRequestHeaders.Add("Accept", "application/json, text/javascript, text/html, application/xml, text/xml, */*");
         _http.DefaultRequestHeaders.Add("Accept-Language", "en-US");
-        _http.DefaultRequestHeaders.Referrer = new Uri(SteamApiConstants.CommunityUrl);
-        _http.DefaultRequestHeaders.Add("Origin", SteamApiConstants.CommunityUrl);
+        _http.DefaultRequestHeaders.Referrer = new Uri(Constants.CommunityUrl);
+        _http.DefaultRequestHeaders.Add("Origin", Constants.CommunityUrl);
         _http.Timeout = TimeSpan.FromSeconds(50);
 
         // Настройка файла логов
@@ -133,10 +133,10 @@ public class SteamGuardEnrollment : IDisposable
 
     private void SetupMobileCookies()
     {
-        var uri = new Uri(SteamApiConstants.CommunityUrl);
-        _cookies.Add(uri, new Cookie("mobileClientVersion", SteamApiConstants.MobileClientVersion));
-        _cookies.Add(uri, new Cookie("mobileClient", SteamApiConstants.MobileClient));
-        _cookies.Add(uri, new Cookie("Steam_Language", SteamApiConstants.MobileLanguage));
+        var uri = new Uri(Constants.CommunityUrl);
+        _cookies.Add(uri, new Cookie("mobileClientVersion", Constants.MobileClientVersion));
+        _cookies.Add(uri, new Cookie("mobileClient", Constants.MobileClient));
+        _cookies.Add(uri, new Cookie("Steam_Language", Constants.MobileLanguage));
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public class SteamGuardEnrollment : IDisposable
                 EncryptedPassword = encPassword,
                 EncryptionTimestamp = timestamp,
                 RememberLogin = true,
-                PlatformType = SteamApiConstants.DevicePlatformType,
+                PlatformType = Constants.DevicePlatformType,
                 Persistence = 1,
                 WebsiteId = "Mobile",
                 DeviceDetails = DeviceDetailsProto.CreateMobileDetails()
@@ -416,7 +416,7 @@ public class SteamGuardEnrollment : IDisposable
         Log($"=== Submit2FACodeAsync ===");
 
         // Генерируем 2FA код из SharedSecret
-        var twoFACode = SteamGuard2FA.GenerateCode(sharedSecret);
+        var twoFACode = new SteamAuthenticator(sharedSecret).GenerateCode();
         Log($"Сгенерирован 2FA код: {twoFACode}");
 
         const int maxRetries = 3;
@@ -469,7 +469,7 @@ public class SteamGuardEnrollment : IDisposable
                     {
                         // Если код неверный — генерируем новый (30 сек интервал)
                         await Task.Delay(1000);
-                        twoFACode = SteamGuard2FA.GenerateCode(sharedSecret);
+                        twoFACode = new SteamAuthenticator(sharedSecret).GenerateCode();
                         Log($"Новый 2FA код: {twoFACode}");
                         continue;
                     }
@@ -501,7 +501,7 @@ public class SteamGuardEnrollment : IDisposable
         string refreshToken = "";
         var pollUrl = "https://api.steampowered.com/IAuthenticationService/PollAuthSessionStatus/v1";
 
-        for (int i = 0; i < SteamApiConstants.MaxPollAttempts; i++)
+        for (int i = 0; i < Constants.MaxPollAttempts; i++)
         {
             await Task.Delay(2000);
 
@@ -790,7 +790,7 @@ public class SteamGuardEnrollment : IDisposable
 
             for (int tries = 0; tries < 30; tries++)
             {
-                string twoFACode = SteamGuard2FA.GenerateCode(_sharedSecret);
+                string twoFACode = new SteamAuthenticator(_sharedSecret).GenerateCode();
                 Log($"Finalize {tries + 1}: TOTP={twoFACode}");
 
                 var req = new FinalizeAddAuthenticator_Request

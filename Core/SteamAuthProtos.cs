@@ -42,10 +42,10 @@ public class DeviceDetailsProto
     public static DeviceDetailsProto CreateMobileDetails()
     {
         return new DeviceDetailsProto(
-            SteamApiConstants.DeviceFriendlyName,
-            SteamApiConstants.DevicePlatformType,
-            SteamApiConstants.DeviceOsType,
-            SteamApiConstants.DeviceGamingDeviceType);
+            Constants.DeviceFriendlyName,
+            Constants.DevicePlatformType,
+            Constants.DeviceOsType,
+            Constants.DeviceGamingDeviceType);
     }
 }
 

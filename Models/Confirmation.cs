@@ -1,6 +1,55 @@
 namespace SteamGuard;
 
 /// <summary>
+/// Тип подтверждения сессии Steam
+/// </summary>
+public enum AuthConfirmationType
+{
+    Unknown = 0,
+    None = 1,
+    EmailCode = 2,
+    DeviceCode = 3,
+    DeviceConfirmation = 4,
+    EmailConfirmation = 5,
+    MachineToken = 6,
+    LegacyMachineAuth = 7
+}
+
+/// <summary>
+/// Типы кодов для UpdateAuthSession
+/// </summary>
+public enum AuthCodeType
+{
+    Unknown = 0,
+    EmailCode = 2,
+    DeviceCode = 3
+}
+
+/// <summary>
+/// Коды результата Steam API
+/// </summary>
+public static class EResult
+{
+    public const int OK = 1;
+    public const int ServiceUnavailable = 2;
+    public const int InvalidCredentials = 8;
+    public const int RateLimit = 5;
+    public const int SessionExpired = 6;
+    public const int InvalidLoginAuthCode = 65;
+
+    public static string GetMessage(int eresult) => eresult switch
+    {
+        OK => "OK",
+        InvalidLoginAuthCode => "Неверный код подтверждения",
+        SessionExpired => "Сессия истекла",
+        RateLimit => "Слишком много попыток",
+        ServiceUnavailable => "Сервер Steam недоступен",
+        InvalidCredentials => "Неверные учётные данные",
+        _ => $"Ошибка Steam (eresult={eresult})"
+    };
+}
+
+/// <summary>
 /// Тип подтверждения Steam
 /// </summary>
 public enum ConfirmationType
@@ -28,9 +77,6 @@ public class Confirmation
     public int IntType { get; set; }
     public List<string> Summary { get; set; } = new();
 
-    /// <summary>
-    /// Отображаемое описание типа
-    /// </summary>
     public string TypeDescription => ConfType switch
     {
         ConfirmationType.Trade => "Обмен",
@@ -41,8 +87,5 @@ public class Confirmation
         _ => "Неизвестно"
     };
 
-    /// <summary>
-    /// Для трейдов — ID предложения обмена
-    /// </summary>
     public ulong TradeId => CreatorId;
 }
