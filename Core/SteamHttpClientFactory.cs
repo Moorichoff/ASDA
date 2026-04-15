@@ -82,10 +82,19 @@ namespace SteamGuard
 
             if (!string.IsNullOrEmpty(account.Session?.SessionId))
             {
+                // Добавляем для steamcommunity.com
                 cookieContainer.Add(new Cookie("sessionid", account.Session.SessionId)
                 {
-                    Domain = "steamcommunity.com",
-                    Path = "/"
+                    Domain = ".steamcommunity.com",
+                    Path = "/",
+                    Secure = true
+                });
+                // Добавляем для store.steampowered.com
+                cookieContainer.Add(new Cookie("sessionid", account.Session.SessionId)
+                {
+                    Domain = ".steampowered.com",
+                    Path = "/",
+                    Secure = true
                 });
                 AppLogger.Debug($"Added sessionid cookie: {account.Session.SessionId}");
             }
@@ -96,10 +105,19 @@ namespace SteamGuard
 
             if (!string.IsNullOrEmpty(account.Session?.SteamLoginSecure))
             {
+                // Добавляем для steamcommunity.com
                 cookieContainer.Add(new Cookie("steamLoginSecure", account.Session.SteamLoginSecure)
                 {
-                    Domain = "steamcommunity.com",
-                    Path = "/"
+                    Domain = ".steamcommunity.com",
+                    Path = "/",
+                    Secure = true
+                });
+                // Добавляем для store.steampowered.com
+                cookieContainer.Add(new Cookie("steamLoginSecure", account.Session.SteamLoginSecure)
+                {
+                    Domain = ".steampowered.com",
+                    Path = "/",
+                    Secure = true
                 });
                 AppLogger.Debug($"Added steamLoginSecure cookie (length: {account.Session.SteamLoginSecure.Length})");
             }

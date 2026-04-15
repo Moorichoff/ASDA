@@ -477,6 +477,44 @@
             stroke: var(--accent);
         }
 
+        .action-btn.wallet-btn svg {
+            fill: var(--text-dim);
+            stroke: none;
+        }
+
+        .action-btn.wallet-btn svg text {
+            fill: var(--text-dim);
+        }
+
+        .action-btn.wallet-btn:hover svg text {
+            fill: var(--accent);
+        }
+
+        .action-btn.wallet-btn.loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .action-btn.wallet-btn.loading svg {
+            opacity: 0;
+        }
+
+        .action-btn.wallet-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            top: 50%;
+            left: 50%;
+            margin-left: -9.5px;
+            margin-top: -7.5px;
+            border: 2px solid transparent;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: button-spin 0.6s linear infinite;
+        }
+
         .action-btn.profile-btn svg {
             stroke: var(--text-dim);
         }
@@ -640,7 +678,7 @@
         /* Settings Modal */
         .modal-settings {
             max-width: 450px;
-            max-height: 80vh;
+            max-height: calc(80vh + 100px);
             display: flex;
             flex-direction: column;
         }
@@ -1830,6 +1868,22 @@
         </div>
     </div>
 
+    <!-- Modal: Password Input -->
+    <div class="modal-overlay" id="modal-password">
+        <div class="modal">
+            <div class="modal-title">Требуется пароль</div>
+            <div class="modal-warning" id="password-modal-message">Введите пароль для обновления сессии</div>
+            <div class="modal-field">
+                <label for="password-input">Пароль</label>
+                <input type="password" id="password-input" placeholder="Введите пароль">
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn" onclick="closeModal('modal-password')">Отмена</button>
+                <button class="modal-btn primary" id="password-submit-btn" onclick="submitPassword()">Войти</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Confirmations -->
     <div class="modal-overlay" id="modal-confirmations">
         <div class="modal modal-confirmations">
@@ -1892,6 +1946,13 @@
                     <div class="modal-checkbox">
                         <input type="checkbox" id="settings-auto-2fa">
                         <label for="settings-auto-2fa">Автоматический ввод 2FA кода</label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Экспорт данных</div>
+                    <div class="modal-field">
+                        <button class="modal-btn" onclick="exportToExcel()" style="width: 100%;">Экспортировать в Excel</button>
                     </div>
                 </div>
 
@@ -2619,6 +2680,35 @@
             }
         }
 
+        // ===== PASSWORD MODAL =====
+        let pendingPasswordAccount = '';
+
+        function showPasswordModal(accountName, message) {
+            pendingPasswordAccount = accountName;
+            document.getElementById('password-modal-message').textContent = message || 'Введите пароль для обновления сессии';
+            document.getElementById('password-input').value = '';
+            openModal('modal-password');
+            // Фокус на поле ввода
+            setTimeout(() => document.getElementById('password-input').focus(), 100);
+        }
+
+        function submitPassword() {
+            const password = document.getElementById('password-input').value;
+            if (!password) {
+                showToast('Введите пароль');
+                return;
+            }
+
+            const btn = document.getElementById('password-submit-btn');
+            setButtonLoading(btn, true);
+
+            window.chrome.webview.postMessage({
+                type: 'SubmitPassword',
+                accountName: pendingPasswordAccount,
+                password: password
+            });
+        }
+
         // ===== CUSTOM SELECT (для модалок) =====
         function toggleCustomSelect(selectId) {
             const select = document.getElementById(selectId);
@@ -2864,6 +2954,11 @@
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                             </svg>
                         </button>
+                        <button class="action-btn wallet-btn" data-account="${account.username}" data-tooltip="Баланс кошелька">
+                            <svg viewBox="0 0 24 24">
+                                <text x="12" y="20" text-anchor="middle" font-size="24" font-weight="bold">$</text>
+                            </svg>
+                        </button>
                         <button class="action-btn copy-btn" data-account="${account.username}" data-tooltip="Копировать код">
                             <svg viewBox="0 0 24 24">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -2906,11 +3001,31 @@
                     openAccountSettings(btn.dataset.account);
                 });
             });
+
+            accountsListWrapper.querySelectorAll('.wallet-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    getWalletBalance(btn.dataset.account);
+                });
+            });
         }
 
         function copyCodeForAccount(accountName) {
             window.chrome.webview.postMessage({
                 type: 'GenerateCodeForAccount',
+                accountName: accountName
+            });
+        }
+
+        function getWalletBalance(accountName) {
+            // Находим кнопку и добавляем анимацию загрузки
+            const btn = document.querySelector(`.wallet-btn[data-account="${accountName}"]`);
+            if (btn) {
+                btn.classList.add('loading');
+            }
+
+            window.chrome.webview.postMessage({
+                type: 'GetWalletBalance',
                 accountName: accountName
             });
         }
@@ -3302,6 +3417,31 @@
             }, 500);
         }
 
+        function exportToExcel() {
+            // Формируем CSV данные с нужными полями
+            const headers = ['Логин', 'Пароль', 'Steam ID', 'Rcode', 'Баланс'];
+            const rows = allAccounts.map(acc => [
+                acc.username || '',
+                acc.password || '',
+                acc.steamId ? `=HYPERLINK("https://steamcommunity.com/profiles/${acc.steamId}";"${acc.steamId}")` : '',
+                acc.revocationCode || '',
+                acc.balance || ''
+            ]);
+
+            // Создаём CSV строку с табуляцией
+            let csv = headers.join('\t') + '\n';
+            rows.forEach(row => {
+                csv += row.join('\t') + '\n';
+            });
+
+            // Копируем в буфер обмена
+            navigator.clipboard.writeText(csv).then(() => {
+                showToast('Данные скопированы в буфер обмена. Вставьте в Excel через Ctrl+V');
+            }).catch(err => {
+                showToast('Ошибка копирования: ' + err.message);
+            });
+        }
+
         let currentProxies = [];
 
         function renderProxies(proxies) {
@@ -3497,6 +3637,44 @@
                 });
             }
 
+            if (type === 'WalletBalanceReceived') {
+                const accountName = data.accountName || '';
+                let balance = data.balanceFormatted || data.balance;
+
+                // Заменяем "руб" на "₽" и убираем ",--"
+                balance = balance.replace(/,--/g, '')
+                    .replace(/ руб\./g, '₽')
+                    .replace(/руб\./g, '₽')
+                    .replace(/ руб/g, '₽')
+                    .replace(/руб/g, '₽');
+
+                showToast(`💰 ${accountName}: ${balance}`);
+
+                // Сохраняем баланс в данные аккаунта
+                const account = allAccounts.find(a => a.username === accountName);
+                if (account) {
+                    account.balance = `="${balance}"`; // Форматируем как текст для Excel
+                }
+
+                // Убираем анимацию загрузки
+                const btn = document.querySelector(`.wallet-btn[data-account="${accountName}"]`);
+                if (btn) {
+                    btn.classList.remove('loading');
+                }
+            }
+
+            if (type === 'WalletBalanceError') {
+                const accountName = data.accountName || '';
+                const message = data.message || 'Не удалось получить баланс';
+                showToast(`❌ ${accountName}: ${message}`);
+
+                // Убираем анимацию загрузки
+                const btn = document.querySelector(`.wallet-btn[data-account="${accountName}"]`);
+                if (btn) {
+                    btn.classList.remove('loading');
+                }
+            }
+
             // Новые типы сообщений
             if (type === 'ShowAccountSettings') {
                 showAccountSettingsModal(data);
@@ -3554,6 +3732,27 @@
 
             if (type === 'SessionRefreshed') {
                 showToast(data.message || 'Сессия обновлена');
+            }
+
+            if (type === 'RequestPassword') {
+                showPasswordModal(data.accountName, data.message);
+            }
+
+            if (type === 'PasswordSuccess') {
+                const message = data.message || '';
+                if (message) {
+                    showToast(message);
+                }
+                closeModal('modal-password');
+                const btn = document.getElementById('password-submit-btn');
+                setButtonLoading(btn, false);
+            }
+
+            if (type === 'PasswordError') {
+                showToast(data.message || 'Ошибка авторизации');
+                const btn = document.getElementById('password-submit-btn');
+                setButtonLoading(btn, false);
+                // Модалка остаётся открытой для повторного ввода
             }
 
             if (type === 'UpdateConfirmations') {

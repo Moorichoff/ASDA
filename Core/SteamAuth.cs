@@ -245,6 +245,9 @@ namespace SteamGuard
         public bool AutoTrade { get; set; } = false;
 
         public bool AutoMarket { get; set; } = false;
+
+        [Newtonsoft.Json.JsonProperty("Balance")]
+        public string Balance { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -385,13 +388,13 @@ namespace SteamGuard
                 IdentitySecret = account.IdentitySecret,
                 DeviceId = account.DeviceId,
                 RevocationCode = account.RevocationCode,
-                SessionId = account.SessionId,
+                SessionId = account.Session?.SessionId ?? account.SessionId,
                 SteamLogin = account.SteamLogin,
-                SteamLoginSecure = account.SteamLoginSecure,
+                SteamLoginSecure = account.Session?.SteamLoginSecure ?? account.SteamLoginSecure,
                 WebCookie = account.WebCookie,
                 SteamId = account.SteamId,
-                AccessToken = account.AccessToken,
-                RefreshToken = account.RefreshToken,
+                AccessToken = account.Session?.AccessToken ?? account.AccessToken,
+                RefreshToken = account.Session?.RefreshToken ?? account.RefreshToken,
                 Session = account.Session,
                 ServerTime = account.ServerTime,
                 SerialNumber = account.SerialNumber,
@@ -403,7 +406,8 @@ namespace SteamGuard
                 Password = account.Password,
                 IsFavorite = account.IsFavorite,
                 AutoTrade = account.AutoTrade,
-                AutoMarket = account.AutoMarket
+                AutoMarket = account.AutoMarket,
+                Balance = account.Balance
             };
 
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(saveAccount, Newtonsoft.Json.Formatting.Indented);

@@ -857,14 +857,24 @@ namespace SteamGuard
         /// </summary>
         public static async Task<bool> RefreshSessionAsync(SteamAccount account)
         {
+            AppLogger.Info($"RefreshSessionAsync: начало для аккаунта {account.Username}");
+
             if (account.Session == null || string.IsNullOrEmpty(account.Session.RefreshToken))
+            {
+                AppLogger.Warn($"RefreshSessionAsync: нет Session или RefreshToken для {account.Username}");
                 return false;
+            }
 
             var refreshToken = account.Session.RefreshToken;
             var steamId = account.Session.SteamId > 0 ? account.Session.SteamId : account.SteamId;
 
             if (steamId == 0)
+            {
+                AppLogger.Warn($"RefreshSessionAsync: SteamId = 0 для {account.Username}");
                 return false;
+            }
+
+            AppLogger.Debug($"RefreshSessionAsync: SteamId={steamId}, RefreshToken length={refreshToken.Length}");
 
             try
             {
@@ -880,21 +890,44 @@ namespace SteamGuard
 
                 var response = await client.PostAsync(ApiUrl, content);
                 if (!response.IsSuccessStatusCode)
+                {
+                    AppLogger.Warn($"RefreshSessionAsync: API вернул код {response.StatusCode}");
                     return false;
+                }
 
                 var responseBytes = await response.Content.ReadAsByteArrayAsync();
                 var result = DecodeRefreshResponse(responseBytes);
 
                 if (string.IsNullOrEmpty(result.accessToken))
+                {
+                    AppLogger.Warn("RefreshSessionAsync: accessToken пустой в ответе");
                     return false;
+                }
+
+                AppLogger.Info($"RefreshSessionAsync: получен новый accessToken (length={result.accessToken.Length})");
 
                 account.Session.AccessToken = result.accessToken;
                 account.Session.SteamLoginSecure = $"{steamId}%7C%7C{result.accessToken}";
                 account.Session.SteamId = steamId;
 
                 if (!string.IsNullOrEmpty(result.refreshToken))
+                {
                     account.Session.RefreshToken = result.refreshToken;
+                    AppLogger.Debug("RefreshSessionAsync: обновлён RefreshToken");
+                }
 
+                // Генерируем новый SessionId если его нет
+                if (string.IsNullOrEmpty(account.Session.SessionId))
+                {
+                    account.Session.SessionId = SessionLoginService.GenerateSessionId();
+                    AppLogger.Info($"RefreshSessionAsync: сгенерирован новый SessionId: {account.Session.SessionId}");
+                }
+                else
+                {
+                    AppLogger.Debug($"RefreshSessionAsync: используется существующий SessionId: {account.Session.SessionId}");
+                }
+
+                AppLogger.Info($"RefreshSessionAsync: успешно обновлена сессия для {account.Username}");
                 return true;
             }
             catch (Exception ex)
@@ -1698,7 +1731,7 @@ namespace SteamGuard
             return GenerateSessionId();
         }
 
-        private static string GenerateSessionId()
+        public static string GenerateSessionId()
         {
             var random = new Random();
             return new string(Enumerable.Range(0, 24).Select(_ => "0123456789abcdef"[random.Next(16)]).ToArray());
@@ -1754,7 +1787,8 @@ namespace SteamGuard
                 if (cookieMatch.Success)
                 {
                     var cookieValue = cookieMatch.Groups[1].Value;
-                    return (true, $"{steamId}%7C%7C{cookieValue}");
+                    // cookieValue уже содержит полный формат: steamId%7C%7Ctoken
+                    return (true, cookieValue);
                 }
 
                 return (false, "");
