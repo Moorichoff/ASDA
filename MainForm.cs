@@ -1335,6 +1335,7 @@ namespace SteamGuard
                 groups = groups,
                 auto2FA = _settingsManager.Settings.Auto2FA,
                 hideLogins = _settingsManager.Settings.HideLogins,
+                requireProxy = _settingsManager.Settings.RequireProxy,
                 proxies = _settingsManager.Settings.Proxies.Select(p => new
                 {
                     name = p.Name ?? "",
@@ -1355,10 +1356,12 @@ namespace SteamGuard
             {
                 string defaultGroup = message["defaultGroup"]?.ToString() ?? "";
                 bool hideLogins = Convert.ToBoolean(message["hideLogins"] ?? false);
+                bool requireProxy = Convert.ToBoolean(message["requireProxy"] ?? false);
 
                 // Обновляем все настройки перед сохранением
                 _settingsManager.Settings.DefaultGroup = defaultGroup;
                 _settingsManager.Settings.HideLogins = hideLogins;
+                _settingsManager.Settings.RequireProxy = requireProxy;
 
                 // Handle proxies
                 if (message.TryGetValue("proxies", out var proxiesObj) && proxiesObj != null)

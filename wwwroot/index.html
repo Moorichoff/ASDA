@@ -1955,6 +1955,10 @@
                         <input type="checkbox" id="settings-hide-logins">
                         <label for="settings-hide-logins">Скрывать логины (показывать только первые и последние символы)</label>
                     </div>
+                    <div class="modal-checkbox">
+                        <input type="checkbox" id="settings-require-proxy">
+                        <label for="settings-require-proxy">🔒 Обязательное использование прокси (блокировать запросы если прокси недоступен)</label>
+                    </div>
                 </div>
 
                 <div class="settings-section">
@@ -3410,6 +3414,10 @@
             hideLogins = data.hideLogins || false;
             document.getElementById('settings-hide-logins').checked = hideLogins;
 
+            // Загружаем настройку обязательного использования прокси
+            requireProxy = data.requireProxy || false;
+            document.getElementById('settings-require-proxy').checked = requireProxy;
+
             // Render proxies
             renderProxies(data.proxies || []);
 
@@ -3422,6 +3430,9 @@
 
             // Сохраняем настройку скрытия логинов
             hideLogins = document.getElementById('settings-hide-logins').checked;
+
+            // Сохраняем настройку обязательного использования прокси
+            requireProxy = document.getElementById('settings-require-proxy').checked;
 
             // Перерисовываем список аккаунтов с новой настройкой
             renderAccounts(allAccounts);
@@ -3443,6 +3454,7 @@
                 type: 'SaveSettings',
                 defaultGroup: getCustomSelectValue('settings-default-group-select', 'settings-default-group-text'),
                 hideLogins: hideLogins,
+                requireProxy: requireProxy,
                 proxies: proxies
             });
 
@@ -3478,6 +3490,7 @@
 
         let currentProxies = [];
         let hideLogins = false; // Настройка скрытия логинов
+        let requireProxy = false; // Настройка обязательного использования прокси
 
         function maskLogin(username) {
             if (!hideLogins || username.length <= 4) {

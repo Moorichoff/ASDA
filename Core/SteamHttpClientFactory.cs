@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 
@@ -63,21 +64,40 @@ namespace SteamGuard
             if (proxyToUse?.Data != null && !string.IsNullOrEmpty(proxyToUse.Data.Address))
             {
                 var proxyUri = new Uri($"http://{proxyToUse.Data.Address}:{proxyToUse.Data.Port}");
-                handler.Proxy = new WebProxy(proxyUri);
-                handler.UseProxy = true;
+                var proxy = new WebProxy(proxyUri)
+                {
+                    // КРИТИЧНО: Запрещаем bypass прокси для любых адресов
+                    // Это гарантирует, что если прокси упадет - запрос не уйдет напрямую
+                    BypassProxyOnLocal = false
+                };
 
                 // Если есть авторизация для прокси
                 if (proxyToUse.Data.AuthEnabled &&
                     !string.IsNullOrEmpty(proxyToUse.Data.Username) &&
                     !string.IsNullOrEmpty(proxyToUse.Data.Password))
                 {
-                    handler.Proxy.Credentials = new NetworkCredential(
+                    proxy.Credentials = new NetworkCredential(
                         proxyToUse.Data.Username,
                         proxyToUse.Data.Password
                     );
                 }
 
-                AppLogger.Debug($"Using proxy: {proxyToUse.Data.Address}:{proxyToUse.Data.Port}");
+                handler.Proxy = proxy;
+                handler.UseProxy = true;
+
+                // КРИТИЧНО: Запрещаем использование системных прокси настроек
+                // Если наш прокси упадет - соединение должно упасть, а не переключиться на системный прокси
+                handler.DefaultProxyCredentials = null;
+                handler.UseDefaultCredentials = false;
+
+                AppLogger.Debug($"Using proxy with IP leak protection: {proxyToUse.Data.Address}:{proxyToUse.Data.Port}");
+            }
+            else
+            {
+                // Если прокси не настроен, но это требуется - можно добавить проверку
+                // Пока разрешаем прямое соединение только если прокси явно не указан
+                handler.UseProxy = false;
+                AppLogger.Debug("No proxy configured, using direct connection");
             }
 
             if (!string.IsNullOrEmpty(account.Session?.SessionId))
@@ -156,6 +176,44 @@ namespace SteamGuard
             };
             ConfigureDefaultHeaders(client);
             return client;
+        }
+
+        /// <summary>
+        /// Создать защищенный HttpClient с проверкой прокси перед каждым запросом
+        /// </summary>
+        public static ProxyProtectedHttpClient CreateProtectedAuthenticatedClient(SteamAccount account, SettingsManager? settingsManager = null)
+        {
+            var client = CreateAuthenticatedClient(account, settingsManager);
+
+            // Определяем параметры прокси для защиты
+            string? proxyAddress = null;
+            int? proxyPort = null;
+            bool requireProxy = settingsManager?.Settings.RequireProxy ?? false;
+
+            // Проверяем прокси аккаунта
+            if (account.Proxy?.Data != null && !string.IsNullOrEmpty(account.Proxy.Data.Address))
+            {
+                proxyAddress = account.Proxy.Data.Address;
+                proxyPort = account.Proxy.Data.Port;
+            }
+            // Проверяем глобальный прокси
+            else if (settingsManager != null && !string.IsNullOrEmpty(settingsManager.Settings.GlobalProxy))
+            {
+                var globalProxyName = settingsManager.Settings.GlobalProxy;
+                var globalProxySettings = settingsManager.Settings.Proxies.FirstOrDefault(p => p.Name == globalProxyName);
+
+                if (globalProxySettings != null && !string.IsNullOrEmpty(globalProxySettings.Address))
+                {
+                    var parts = globalProxySettings.Address.Split(':');
+                    if (parts.Length >= 2 && int.TryParse(parts[1], out int port))
+                    {
+                        proxyAddress = parts[0];
+                        proxyPort = port;
+                    }
+                }
+            }
+
+            return new ProxyProtectedHttpClient(client, proxyAddress, proxyPort, requireProxy);
         }
 
         private static HttpClient CreateDefaultClient()

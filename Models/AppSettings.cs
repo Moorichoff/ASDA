@@ -24,6 +24,11 @@ namespace SteamGuard
         public bool HideLogins { get; set; } = false;
 
         /// <summary>
+        /// Обязательное использование прокси (блокировать запросы если прокси недоступен)
+        /// </summary>
+        public bool RequireProxy { get; set; } = false;
+
+        /// <summary>
         /// Глобальный прокси (применяется ко всем аккаунтам без своего прокси)
         /// </summary>
         public string? GlobalProxy { get; set; } = null;
