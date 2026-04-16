@@ -31,13 +31,14 @@ namespace SteamGuard
             // Определяем какой прокси использовать
             MaFileProxy? proxyToUse = account.Proxy;
 
-            // Если у аккаунта нет своего прокси, проверяем глобальный
+            // Если у аккаунта нет своего прокси, проверяем глобальный (только если он активен)
             if (proxyToUse == null && settingsManager != null && !string.IsNullOrEmpty(settingsManager.Settings.GlobalProxy))
             {
                 var globalProxyName = settingsManager.Settings.GlobalProxy;
                 var globalProxySettings = settingsManager.Settings.Proxies.FirstOrDefault(p => p.Name == globalProxyName);
 
-                if (globalProxySettings != null && !string.IsNullOrEmpty(globalProxySettings.Address))
+                // ВАЖНО: Используем глобальный прокси только если он активен
+                if (globalProxySettings != null && globalProxySettings.IsActive && !string.IsNullOrEmpty(globalProxySettings.Address))
                 {
                     var parts = globalProxySettings.Address.Split(':');
                     if (parts.Length >= 2 && int.TryParse(parts[1], out int port))
@@ -55,8 +56,12 @@ namespace SteamGuard
                                 AuthEnabled = !string.IsNullOrEmpty(globalProxySettings.Username)
                             }
                         };
-                        AppLogger.Debug($"Using global proxy: {parts[0]}:{port}");
+                        AppLogger.Debug($"Using active global proxy: {parts[0]}:{port}");
                     }
+                }
+                else if (globalProxySettings != null && !globalProxySettings.IsActive)
+                {
+                    AppLogger.Debug($"Global proxy '{globalProxyName}' is not active, skipping");
                 }
             }
 
@@ -189,31 +194,38 @@ namespace SteamGuard
             string? proxyAddress = null;
             int? proxyPort = null;
 
-            // ВАЖНО: Если прокси настроен - ВСЕГДА требуем его использование для безопасности
+            // ВАЖНО: Если прокси настроен И активен - ВСЕГДА требуем его использование для безопасности
             bool requireProxy = false;
 
-            // Проверяем прокси аккаунта
+            // Проверяем прокси аккаунта (если указан - всегда считается активным)
             if (account.Proxy?.Data != null && !string.IsNullOrEmpty(account.Proxy.Data.Address))
             {
                 proxyAddress = account.Proxy.Data.Address;
                 proxyPort = account.Proxy.Data.Port;
-                requireProxy = true; // Прокси настроен - требуем его использование
+                requireProxy = true; // Прокси аккаунта настроен - требуем его использование
+                AppLogger.Debug($"Account has own proxy configured: {proxyAddress}:{proxyPort}");
             }
-            // Проверяем глобальный прокси
+            // Проверяем глобальный прокси (только если активен)
             else if (settingsManager != null && !string.IsNullOrEmpty(settingsManager.Settings.GlobalProxy))
             {
                 var globalProxyName = settingsManager.Settings.GlobalProxy;
                 var globalProxySettings = settingsManager.Settings.Proxies.FirstOrDefault(p => p.Name == globalProxyName);
 
-                if (globalProxySettings != null && !string.IsNullOrEmpty(globalProxySettings.Address))
+                // ВАЖНО: Используем глобальный прокси только если он активен
+                if (globalProxySettings != null && globalProxySettings.IsActive && !string.IsNullOrEmpty(globalProxySettings.Address))
                 {
                     var parts = globalProxySettings.Address.Split(':');
                     if (parts.Length >= 2 && int.TryParse(parts[1], out int port))
                     {
                         proxyAddress = parts[0];
                         proxyPort = port;
-                        requireProxy = true; // Прокси настроен - требуем его использование
+                        requireProxy = true; // Активный глобальный прокси - требуем его использование
+                        AppLogger.Debug($"Using active global proxy: {proxyAddress}:{proxyPort}");
                     }
+                }
+                else if (globalProxySettings != null && !globalProxySettings.IsActive)
+                {
+                    AppLogger.Debug($"Global proxy '{globalProxyName}' is not active, no proxy protection");
                 }
             }
 
