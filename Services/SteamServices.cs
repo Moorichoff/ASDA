@@ -973,34 +973,6 @@ namespace SteamGuard
             return (accessToken, refreshToken);
         }
 
-        private static void WriteString(Stream ms, int fieldNumber, string value)
-        {
-            WriteVarint(ms, (uint)((fieldNumber << 3) | 2));
-            var bytes = Encoding.UTF8.GetBytes(value);
-            WriteVarint(ms, (uint)bytes.Length);
-            ms.Write(bytes, 0, bytes.Length);
-        }
-
-        private static void WriteVarint(Stream ms, ulong value)
-        {
-            while (value >= 0x80)
-            {
-                ms.WriteByte((byte)(value | 0x80));
-                value >>= 7;
-            }
-            ms.WriteByte((byte)value);
-        }
-
-        private static void WriteVarint(Stream ms, uint value)
-        {
-            while (value >= 0x80)
-            {
-                ms.WriteByte((byte)(value | 0x80));
-                value >>= 7;
-            }
-            ms.WriteByte((byte)value);
-        }
-
         private static uint ReadVarint(BinaryReader reader)
         {
             uint result = 0;
@@ -1116,7 +1088,7 @@ namespace SteamGuard
                 var timestamp = rsaData.timestamp;
 
                 // Шаг 2: Шифруем пароль
-                var encryptedPassword = RsaEncryptPassword(password, rsaData.publicKeyMod, rsaData.publicKeyExp, timestamp);
+                var encryptedPassword = CryptoHelper.EncryptPasswordRsa(password, rsaData.publicKeyMod, rsaData.publicKeyExp);
                 AppLogger.Info($"Пароль зашифрован, длина: {encryptedPassword.Length}");
 
                 // Шаг 3: BeginAuthSessionViaCredentials (используем timestamp из RSA API)
@@ -1295,7 +1267,7 @@ namespace SteamGuard
         private static byte[] EncodeRsaRequest(string accountName)
         {
             using var ms = new MemoryStream();
-            WriteString(ms, 1, accountName);
+            ProtobufHelper.WriteString(ms, 1, accountName);
             return ms.ToArray();
         }
 
@@ -1320,43 +1292,6 @@ namespace SteamGuard
             }
 
             return string.IsNullOrEmpty(publicKeyMod) ? null : (publicKeyMod, publicKeyExp, timestamp);
-        }
-
-        private static string RsaEncryptPassword(string password, string modulus, string exponent, long timestamp)
-        {
-            try
-            {
-                var modBytes = HexStringToByteArray(modulus);
-                var expBytes = HexStringToByteArray(exponent);
-
-                // RSA с PKCS#1 v1.5 padding
-                var rsaParams = new System.Security.Cryptography.RSAParameters
-                {
-                    Modulus = modBytes,
-                    Exponent = expBytes
-                };
-
-                using var rsa = System.Security.Cryptography.RSA.Create();
-                rsa.ImportParameters(rsaParams);
-
-                var passwordBytes = Encoding.UTF8.GetBytes(password);
-                var encrypted = rsa.Encrypt(passwordBytes, System.Security.Cryptography.RSAEncryptionPadding.Pkcs1);
-
-                return Convert.ToBase64String(encrypted);
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Error($"Ошибка RSA шифрования: {ex.Message}");
-                return password;
-            }
-        }
-
-        private static byte[] HexStringToByteArray(string hex)
-        {
-            var bytes = new byte[hex.Length / 2];
-            for (int i = 0; i < hex.Length; i += 2)
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            return bytes;
         }
 
         // ===== BEGIN AUTH SESSION =====
@@ -1393,25 +1328,25 @@ namespace SteamGuard
             using var ms = new MemoryStream();
 
             // field 1: device_friendly_name (string) = "Steam Guard"
-            WriteString(ms, 1, "Steam Guard");
+            ProtobufHelper.WriteString(ms, 1, "Steam Guard");
             // field 2: account_name (string)
-            WriteString(ms, 2, accountName);
+            ProtobufHelper.WriteString(ms, 2, accountName);
             // field 3: encrypted_password (string)
-            WriteString(ms, 3, encryptedPassword);
+            ProtobufHelper.WriteString(ms, 3, encryptedPassword);
             // field 4: encryption_timestamp (uint64)
-            WriteTag(ms, 4, 0);
-            WriteVarint(ms, (ulong)timestamp);
+            ProtobufHelper.WriteTag(ms, 4, 0);
+            ProtobufHelper.WriteVarint(ms, (ulong)timestamp);
             // field 5: remember_login (bool = true)
-            WriteTag(ms, 5, 0);
-            WriteVarint(ms, 1u);
+            ProtobufHelper.WriteTag(ms, 5, 0);
+            ProtobufHelper.WriteVarint(ms, 1u);
             // field 6: platform_type (enum = 3 for MobileApp)
-            WriteTag(ms, 6, 0);
-            WriteVarint(ms, 3u);
+            ProtobufHelper.WriteTag(ms, 6, 0);
+            ProtobufHelper.WriteVarint(ms, 3u);
             // field 7: persistence (int32 = 1 for Session)
-            WriteTag(ms, 7, 0);
-            WriteVarint(ms, 1u);
+            ProtobufHelper.WriteTag(ms, 7, 0);
+            ProtobufHelper.WriteVarint(ms, 1u);
             // field 8: website_id (string = "Mobile")
-            WriteString(ms, 8, "Mobile");
+            ProtobufHelper.WriteString(ms, 8, "Mobile");
             // field 9: device_details (embedded message)
             WriteBeginAuthDeviceDetails(ms, "Pixel 6 Pro", 3, -500, 528);
 
@@ -1426,27 +1361,21 @@ namespace SteamGuard
             using var innerMs = new MemoryStream();
 
             // field 1: device_friendly_name (string)
-            WriteString(innerMs, 1, deviceName);
+            ProtobufHelper.WriteString(innerMs, 1, deviceName);
             // field 2: platform_type (int32 enum)
-            WriteTag(innerMs, 2, 0);
-            WriteVarint(innerMs, (uint)platformType);
+            ProtobufHelper.WriteTag(innerMs, 2, 0);
+            ProtobufHelper.WriteVarint(innerMs, (uint)platformType);
             // field 3: os_type (int32)
-            WriteTag(innerMs, 3, 0);
-            WriteSInt32(innerMs, osType);
+            ProtobufHelper.WriteTag(innerMs, 3, 0);
+            ProtobufHelper.WriteSInt32(innerMs, osType);
             // field 4: gaming_device_type (uint32)
-            WriteTag(innerMs, 4, 0);
-            WriteVarint(innerMs, gamingDeviceType);
+            ProtobufHelper.WriteTag(innerMs, 4, 0);
+            ProtobufHelper.WriteVarint(innerMs, gamingDeviceType);
 
             var innerBytes = innerMs.ToArray();
-            WriteTag(ms, 9, 2);
-            WriteVarint(ms, (uint)innerBytes.Length);
+            ProtobufHelper.WriteTag(ms, 9, 2);
+            ProtobufHelper.WriteVarint(ms, (uint)innerBytes.Length);
             ms.Write(innerBytes, 0, innerBytes.Length);
-        }
-
-        private static void WriteSInt32(Stream ms, int value)
-        {
-            uint v = (uint)((value << 1) ^ (value >> 31));
-            WriteVarint(ms, v);
         }
 
         private static (ulong clientId, ulong steamId, byte[] requestId, int[] allowedConfirmations, string errorMessage)? DecodeBeginAuthResponse(byte[] data)
@@ -1551,16 +1480,16 @@ namespace SteamGuard
         {
             using var ms = new MemoryStream();
             // field 1: client_id (uint64, varint)
-            WriteTag(ms, 1, 0);
-            WriteVarint(ms, clientId);
+            ProtobufHelper.WriteTag(ms, 1, 0);
+            ProtobufHelper.WriteVarint(ms, clientId);
             // field 2: steamid (uint64, FIXED SIZE - wire type 1)
-            WriteTag(ms, 2, 1);
-            WriteFixed64(ms, steamId);
+            ProtobufHelper.WriteTag(ms, 2, 1);
+            ProtobufHelper.WriteFixed64(ms, steamId);
             // field 3: code (string)
-            WriteString(ms, 3, code);
+            ProtobufHelper.WriteString(ms, 3, code);
             // field 4: code_type (enum, varint)
-            WriteTag(ms, 4, 0);
-            WriteVarint(ms, (uint)codeType);
+            ProtobufHelper.WriteTag(ms, 4, 0);
+            ProtobufHelper.WriteVarint(ms, (uint)codeType);
             
             var manualBytes = ms.ToArray();
             
@@ -1666,11 +1595,11 @@ namespace SteamGuard
         {
             using var ms = new MemoryStream();
             // field 1: client_id (uint64)
-            WriteTag(ms, 1, 0);
-            WriteVarint(ms, clientId);
+            ProtobufHelper.WriteTag(ms, 1, 0);
+            ProtobufHelper.WriteVarint(ms, clientId);
             // field 2: request_id (bytes)
-            WriteTag(ms, 2, 2);
-            WriteVarint(ms, (uint)requestId.Length);
+            ProtobufHelper.WriteTag(ms, 2, 2);
+            ProtobufHelper.WriteVarint(ms, (uint)requestId.Length);
             ms.Write(requestId, 0, requestId.Length);
             return ms.ToArray();
         }
@@ -1845,18 +1774,7 @@ namespace SteamGuard
             }
         }
 
-        // ===== PROTOBUF HELPERS =====
-
-        private static void WriteTag(Stream ms, int fieldNumber, int wireType)
-        {
-            WriteVarint(ms, (uint)((fieldNumber << 3) | wireType));
-        }
-
-        private static void WriteSInt64(Stream ms, long value)
-        {
-            ulong v = (ulong)((value << 1) ^ (value >> 63));
-            WriteVarint(ms, v);
-        }
+        // ===== PROTOBUF HELPERS (используем ProtobufHelper) =====
 
         private static ulong ReadVarint(BinaryReader reader)
         {
@@ -1871,34 +1789,6 @@ namespace SteamGuard
                 if (shift >= 64) throw new OverflowException("Varint too long");
             }
             return result;
-        }
-
-        private static void WriteVarint(Stream ms, uint value)
-        {
-            while (value >= 0x80)
-            {
-                ms.WriteByte((byte)(value | 0x80));
-                value >>= 7;
-            }
-            ms.WriteByte((byte)value);
-        }
-
-        private static void WriteVarint(Stream ms, ulong value)
-        {
-            while (value >= 0x80)
-            {
-                ms.WriteByte((byte)(value | 0x80));
-                value >>= 7;
-            }
-            ms.WriteByte((byte)value);
-        }
-
-        private static void WriteString(Stream ms, int fieldNumber, string value)
-        {
-            WriteTag(ms, fieldNumber, 2);
-            var bytes = Encoding.UTF8.GetBytes(value);
-            WriteVarint(ms, (uint)bytes.Length);
-            ms.Write(bytes, 0, bytes.Length);
         }
 
         private static string ReadString(BinaryReader reader)

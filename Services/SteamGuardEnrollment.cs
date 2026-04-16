@@ -168,7 +168,7 @@ public class SteamGuardEnrollment : IDisposable
             if (string.IsNullOrEmpty(pubMod))
                 return (false, "Невалидный RSA ключ", false, 0);
 
-            var encPassword = EncryptPassword(password, pubMod, pubExp);
+            var encPassword = CryptoHelper.EncryptPasswordRsa(password, pubMod, pubExp);
 
             // BeginAuthSession
             var beginRequest = new BeginAuthSessionViaCredentials_Request
@@ -833,26 +833,6 @@ public class SteamGuardEnrollment : IDisposable
             LogError($"FinalizeAuthenticatorAsync EXCEPTION", ex);
             return (false, ex.Message);
         }
-    }
-
-    private string EncryptPassword(string password, string publicKeyMod, string publicKeyExp)
-    {
-        using var rsa = RSA.Create();
-        rsa.ImportParameters(new RSAParameters
-        {
-            Modulus = HexToBytes(publicKeyMod),
-            Exponent = HexToBytes(publicKeyExp)
-        });
-        var encrypted = rsa.Encrypt(Encoding.ASCII.GetBytes(password), RSAEncryptionPadding.Pkcs1);
-        return Convert.ToBase64String(encrypted);
-    }
-
-    private byte[] HexToBytes(string hex)
-    {
-        var bytes = new byte[hex.Length / 2];
-        for (int i = 0; i < hex.Length; i += 2)
-            bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-        return bytes;
     }
 
     /// <summary>
