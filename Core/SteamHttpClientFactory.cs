@@ -188,13 +188,16 @@ namespace SteamGuard
             // Определяем параметры прокси для защиты
             string? proxyAddress = null;
             int? proxyPort = null;
-            bool requireProxy = settingsManager?.Settings.RequireProxy ?? false;
+
+            // ВАЖНО: Если прокси настроен - ВСЕГДА требуем его использование для безопасности
+            bool requireProxy = false;
 
             // Проверяем прокси аккаунта
             if (account.Proxy?.Data != null && !string.IsNullOrEmpty(account.Proxy.Data.Address))
             {
                 proxyAddress = account.Proxy.Data.Address;
                 proxyPort = account.Proxy.Data.Port;
+                requireProxy = true; // Прокси настроен - требуем его использование
             }
             // Проверяем глобальный прокси
             else if (settingsManager != null && !string.IsNullOrEmpty(settingsManager.Settings.GlobalProxy))
@@ -209,6 +212,7 @@ namespace SteamGuard
                     {
                         proxyAddress = parts[0];
                         proxyPort = port;
+                        requireProxy = true; // Прокси настроен - требуем его использование
                     }
                 }
             }
