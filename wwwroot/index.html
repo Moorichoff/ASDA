@@ -1726,7 +1726,7 @@
                     <circle cx="11" cy="11" r="8"/>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input type="text" id="search-input" placeholder="Поиск" autocomplete="off">
+                <input type="text" id="search-input" data-i18n-placeholder="accounts.search" placeholder="Поиск" autocomplete="off">
             </div>
             <div class="accounts-list-wrapper">
                 <div class="accounts-list" id="accounts-list">
@@ -1740,21 +1740,21 @@
     <div class="context-menu" id="context-menu">
         <div class="context-menu-item" onclick="contextMenuAction('settings')">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            <span>Настройки</span>
+            <span data-i18n="context.settings">Настройки</span>
         </div>
         <div class="context-menu-item" onclick="contextMenuAction('session')">
             <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            <span>Обновить сессию</span>
+            <span data-i18n="context.refreshSession">Обновить сессию</span>
         </div>
         <div class="context-menu-divider"></div>
         <div class="context-menu-item" onclick="contextMenuAction('profile')">
             <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Профиль Steam</span>
+            <span data-i18n="context.steamProfile">Профиль Steam</span>
         </div>
         <div class="context-menu-divider"></div>
         <div class="context-menu-item danger" onclick="contextMenuAction('remove')">
             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            <span>Удалить аккаунт</span>
+            <span data-i18n="context.removeAccount">Удалить аккаунт</span>
         </div>
     </div>
 
@@ -1808,7 +1808,7 @@
                 <div class="modal-field">
                     <label data-i18n="modal.account.revocationCode">R-код (код восстановления)</label>
                     <div class="revocation-code" id="acc-settings-revocation-code" onclick="copyRevocationCode()"></div>
-                    <div class="modal-warning">Нажмите на код, чтобы скопировать</div>
+                    <div class="modal-warning" data-i18n="modal.addAccount.clickToCopy">Нажмите на код, чтобы скопировать</div>
                 </div>
             </div>
             <div class="modal-buttons">
@@ -1822,17 +1822,17 @@
     <div class="modal-overlay" id="modal-add-account">
         <div class="modal">
             <div class="modal-title" data-i18n="modal.addAccount.title">Добавить аккаунт</div>
-            <div class="modal-step" id="add-account-step">Шаг 1: Авторизация</div>
+            <div class="modal-step" id="add-account-step" data-i18n="modal.addAccount.step1">Шаг 1: Авторизация</div>
 
             <!-- Step 1: Login -->
             <div id="add-account-step-login">
                 <div class="modal-field">
                     <label for="add-account-login" data-i18n="modal.addAccount.username">Логин</label>
-                    <input type="text" id="add-account-login" placeholder="Введите логин Steam">
+                    <input type="text" id="add-account-login" data-i18n-placeholder="modal.addAccount.loginPlaceholder" placeholder="Введите логин Steam">
                 </div>
                 <div class="modal-field">
                     <label for="add-account-password" data-i18n="modal.addAccount.password">Пароль</label>
-                    <input type="password" id="add-account-password" placeholder="Введите пароль">
+                    <input type="password" id="add-account-password" data-i18n-placeholder="modal.addAccount.passwordPlaceholder" placeholder="Введите пароль">
                 </div>
                 <div class="modal-field">
                     <label data-i18n="modal.addAccount.group">Группа</label>
@@ -1850,29 +1850,29 @@
             <div id="add-account-step-email" style="display: none;">
                 <div class="modal-field">
                     <label for="add-account-email-code" data-i18n="modal.addAccount.emailCode">Код с почты</label>
-                    <input type="text" id="add-account-email-code" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
+                    <input type="text" id="add-account-email-code" data-i18n-placeholder="modal.addAccount.emailCodePlaceholder" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
                 </div>
-                <div class="modal-warning">Введите код подтверждения из электронной почты</div>
+                <div class="modal-warning" data-i18n="modal.addAccount.emailWarning">Введите код подтверждения из электронной почты</div>
             </div>
 
             <!-- Step 3: Guard Code -->
             <div id="add-account-step-guard" style="display: none;">
                 <div class="modal-field">
                     <label for="add-account-guard-code">Код Steam Guard</label>
-                    <input type="text" id="add-account-guard-code" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
+                    <input type="text" id="add-account-guard-code" data-i18n-placeholder="modal.addAccount.guardCodePlaceholder" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
                 </div>
-                <div class="modal-warning">Введите код для подключения Steam Guard</div>
+                <div class="modal-warning" data-i18n="modal.addAccount.guardWarning">Введите код для подключения Steam Guard</div>
             </div>
 
             <!-- Step 4: Revocation Code -->
             <div id="add-account-step-revocation" style="display: none;">
-                <div class="modal-warning">Сохраните этот код! Он необходим для восстановления аккаунта.</div>
+                <div class="modal-warning" data-i18n="modal.addAccount.revocationWarning">Сохраните этот код! Он необходим для восстановления аккаунта.</div>
                 <div class="revocation-code" id="add-account-revocation-code" onclick="copyRevocationCode()"></div>
             </div>
 
             <div class="modal-buttons">
                 <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-add-account')">Отмена</button>
-                <button class="modal-btn primary" id="add-account-next-btn" onclick="addAccountNext()">Далее</button>
+                <button class="modal-btn primary" id="add-account-next-btn" data-i18n="btn.next" onclick="addAccountNext()">Далее</button>
             </div>
         </div>
     </div>
@@ -1884,7 +1884,7 @@
             <div class="modal-warning" id="password-modal-message" data-i18n="modal.password.message">Введите пароль для обновления сессии</div>
             <div class="modal-field">
                 <label for="password-input" data-i18n="modal.password.label">Пароль</label>
-                <input type="password" id="password-input" placeholder="Введите пароль">
+                <input type="password" id="password-input" data-i18n-placeholder="modal.password.placeholder" placeholder="Введите пароль">
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-password')">Отмена</button>
@@ -2490,7 +2490,7 @@
                 list.innerHTML = `
                     <div class="confirmations-loading">
                         <div class="spinner"></div>
-                        <span>Загрузка подтверждений...</span>
+                        <span>${t('modal.confirmations.loading')}</span>
                     </div>
                 `;
                 list.removeAttribute('data-loaded');
@@ -2521,7 +2521,7 @@
                             <line x1="12" y1="8" x2="12" y2="12"/>
                             <line x1="12" y1="16" x2="12.01" y2="16"/>
                         </svg>
-                        <span>Нечего подтверждать</span>
+                        <span>${t('modal.confirmations.nothingToConfirm')}</span>
                     </div>
                 `;
                 return;
@@ -2556,7 +2556,7 @@
                     <div class="confirmation-header">
                         ${conf.icon ? `<img src="${conf.icon}" class="confirmation-avatar" alt="Avatar">` : ''}
                         <div class="confirmation-header-info">
-                            <div class="confirmation-headline">${conf.headline || 'Без описания'}</div>
+                            <div class="confirmation-headline">${conf.headline || t('modal.confirmations.noDescription')}</div>
                             <div class="confirmation-type">
                                 ${typeIcon}
                                 ${typeName} • ${timeAgo}
@@ -2566,8 +2566,8 @@
                     ${summaryHtml ? `<div class="confirmation-summary">${summaryHtml}</div>` : ''}
                     ${warnHtml}
                     <div class="confirmation-actions">
-                        <button class="confirmation-btn deny" onclick="denyConfirmation('${conf.id}')">Отклонить</button>
-                        <button class="confirmation-btn accept" onclick="acceptConfirmation('${conf.id}')">Принять</button>
+                        <button class="confirmation-btn deny" onclick="denyConfirmation('${conf.id}')">${t('btn.deny')}</button>
+                        <button class="confirmation-btn accept" onclick="acceptConfirmation('${conf.id}')">${t('btn.accept')}</button>
                     </div>
                 `;
 
@@ -2577,11 +2577,11 @@
 
         function getConfirmationTypeName(type) {
             switch(type) {
-                case 1: return 'Трейд';
-                case 2: return 'Маркет';
-                case 3: return 'Вход';
-                case 4: return 'Общее';
-                default: return 'Подтверждение';
+                case 1: return t('modal.confirmations.typeTrade');
+                case 2: return t('modal.confirmations.typeMarket');
+                case 3: return t('modal.confirmations.typeLogin');
+                case 4: return t('modal.confirmations.typeGeneral');
+                default: return t('modal.confirmations.typeConfirmation');
             }
         }
 
@@ -2983,7 +2983,7 @@
             accountsListWrapper.innerHTML = '';
 
             if (filtered.length === 0) {
-                accountsListWrapper.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-dim); font-size: 12px;">Аккаунты не найдены</div>';
+                accountsListWrapper.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-dim); font-size: 12px;">${t('accounts.notFound')}</div>`;
                 return;
             }
 
@@ -3550,7 +3550,7 @@
             const list = document.getElementById('proxies-list');
             
             if (proxies.length === 0) {
-                list.innerHTML = '<div style="text-align: center; padding: 10px; color: var(--text-dim); font-size: 11px;">Прокси не добавлены</div>';
+                list.innerHTML = `<div style="text-align: center; padding: 10px; color: var(--text-dim); font-size: 11px;">${t('proxy.notAdded')}</div>`;
                 return;
             }
             

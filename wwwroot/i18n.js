@@ -4,9 +4,12 @@ const translations = {
         // Главный экран
         'app.title': 'Awakened Steam Desktop Authenticator',
         'accounts.title': 'Аккаунты',
-        'accounts.search': 'Поиск аккаунтов...',
+        'accounts.search': 'Поиск',
         'accounts.noAccounts': 'Нет аккаунтов',
+        'accounts.notFound': 'Аккаунты не найдены',
         'accounts.addAccount': 'Добавить аккаунт',
+        'groups.all': 'Все группы',
+        'groups.favorites': 'Избранное',
 
         // Кнопки действий
         'btn.copy': 'Копировать код',
@@ -23,6 +26,14 @@ const translations = {
         'btn.create': 'Создать',
         'btn.next': 'Далее',
         'btn.login': 'Войти',
+        'btn.accept': 'Принять',
+        'btn.deny': 'Отклонить',
+
+        // Контекстное меню
+        'context.settings': 'Настройки',
+        'context.refreshSession': 'Обновить сессию',
+        'context.steamProfile': 'Профиль Steam',
+        'context.removeAccount': 'Удалить аккаунт',
 
         // Тултипы тулбара
         'toolbar.addAccount': 'Добавить аккаунт',
@@ -61,6 +72,14 @@ const translations = {
         'modal.confirmations.noConfirmations': 'Нет подтверждений',
         'modal.confirmations.acceptAll': 'Принять все',
         'modal.confirmations.cancelAll': 'Отклонить все',
+        'modal.confirmations.loading': 'Загрузка подтверждений...',
+        'modal.confirmations.nothingToConfirm': 'Нечего подтверждать',
+        'modal.confirmations.noDescription': 'Без описания',
+        'modal.confirmations.typeTrade': 'Трейд',
+        'modal.confirmations.typeMarket': 'Маркет',
+        'modal.confirmations.typeLogin': 'Вход',
+        'modal.confirmations.typeGeneral': 'Общее',
+        'modal.confirmations.typeConfirmation': 'Подтверждение',
 
         'modal.trades.title': 'Торговые предложения',
         'modal.trades.noTrades': 'Нет торговых предложений',
@@ -77,10 +96,19 @@ const translations = {
         'modal.addAccount.step2': 'Шаг 2: Код с почты',
         'modal.addAccount.step3': 'Шаг 3: Код Steam Guard',
         'modal.addAccount.step4': 'Шаг 4: Код восстановления',
+        'modal.addAccount.loginPlaceholder': 'Введите логин Steam',
+        'modal.addAccount.passwordPlaceholder': 'Введите пароль',
+        'modal.addAccount.emailCodePlaceholder': 'Введите код из письма',
+        'modal.addAccount.guardCodePlaceholder': 'Введите код из письма',
+        'modal.addAccount.emailWarning': 'Введите код подтверждения из электронной почты',
+        'modal.addAccount.guardWarning': 'Введите код для подключения Steam Guard',
+        'modal.addAccount.revocationWarning': 'Сохраните этот код! Он необходим для восстановления аккаунта.',
+        'modal.addAccount.clickToCopy': 'Нажмите на код, чтобы скопировать',
 
         'modal.password.title': 'Требуется пароль',
         'modal.password.message': 'Введите пароль для обновления сессии',
         'modal.password.label': 'Пароль',
+        'modal.password.placeholder': 'Введите пароль',
 
         'modal.createGroup.title': 'Создать группу',
         'modal.createGroup.name': 'Название группы',
@@ -96,6 +124,9 @@ const translations = {
         'modal.addProxy.password': 'Пароль (необязательно)',
         'modal.addProxy.passwordPlaceholder': 'password',
 
+        // Прокси
+        'proxy.notAdded': 'Прокси не добавлены',
+
         // Уведомления
         'toast.codeCopied': 'Код скопирован',
         'toast.saved': 'Сохранено',
@@ -106,9 +137,12 @@ const translations = {
         // Main screen
         'app.title': 'Awakened Steam Desktop Authenticator',
         'accounts.title': 'Accounts',
-        'accounts.search': 'Search accounts...',
+        'accounts.search': 'Search',
         'accounts.noAccounts': 'No accounts',
+        'accounts.notFound': 'Accounts not found',
         'accounts.addAccount': 'Add Account',
+        'groups.all': 'All groups',
+        'groups.favorites': 'Favorites',
 
         // Action buttons
         'btn.copy': 'Copy code',
@@ -125,6 +159,14 @@ const translations = {
         'btn.create': 'Create',
         'btn.next': 'Next',
         'btn.login': 'Login',
+        'btn.accept': 'Accept',
+        'btn.deny': 'Deny',
+
+        // Context menu
+        'context.settings': 'Settings',
+        'context.refreshSession': 'Refresh session',
+        'context.steamProfile': 'Steam Profile',
+        'context.removeAccount': 'Remove Account',
 
         // Toolbar tooltips
         'toolbar.addAccount': 'Add Account',
@@ -163,6 +205,14 @@ const translations = {
         'modal.confirmations.noConfirmations': 'No confirmations',
         'modal.confirmations.acceptAll': 'Accept All',
         'modal.confirmations.cancelAll': 'Cancel All',
+        'modal.confirmations.loading': 'Loading confirmations...',
+        'modal.confirmations.nothingToConfirm': 'Nothing to confirm',
+        'modal.confirmations.noDescription': 'No description',
+        'modal.confirmations.typeTrade': 'Trade',
+        'modal.confirmations.typeMarket': 'Market',
+        'modal.confirmations.typeLogin': 'Login',
+        'modal.confirmations.typeGeneral': 'General',
+        'modal.confirmations.typeConfirmation': 'Confirmation',
 
         'modal.trades.title': 'Trade Offers',
         'modal.trades.noTrades': 'No trade offers',
@@ -179,10 +229,19 @@ const translations = {
         'modal.addAccount.step2': 'Step 2: Email Code',
         'modal.addAccount.step3': 'Step 3: Steam Guard Code',
         'modal.addAccount.step4': 'Step 4: Recovery Code',
+        'modal.addAccount.loginPlaceholder': 'Enter Steam login',
+        'modal.addAccount.passwordPlaceholder': 'Enter password',
+        'modal.addAccount.emailCodePlaceholder': 'Enter code from email',
+        'modal.addAccount.guardCodePlaceholder': 'Enter code from email',
+        'modal.addAccount.emailWarning': 'Enter confirmation code from email',
+        'modal.addAccount.guardWarning': 'Enter code to enable Steam Guard',
+        'modal.addAccount.revocationWarning': 'Save this code! It is required for account recovery.',
+        'modal.addAccount.clickToCopy': 'Click on code to copy',
 
         'modal.password.title': 'Password Required',
         'modal.password.message': 'Enter password to refresh session',
         'modal.password.label': 'Password',
+        'modal.password.placeholder': 'Enter password',
 
         'modal.createGroup.title': 'Create Group',
         'modal.createGroup.name': 'Group Name',
@@ -197,6 +256,9 @@ const translations = {
         'modal.addProxy.usernamePlaceholder': 'user',
         'modal.addProxy.password': 'Password (optional)',
         'modal.addProxy.passwordPlaceholder': 'password',
+
+        // Proxy
+        'proxy.notAdded': 'No proxies added',
 
         // Notifications
         'toast.codeCopied': 'Code copied',
