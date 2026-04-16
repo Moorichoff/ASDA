@@ -132,6 +132,55 @@ const translations = {
         'toast.saved': 'Сохранено',
         'toast.error': 'Ошибка',
         'toast.loading': 'Загрузка...',
+        'toast.steamIdNotFound': 'SteamID не найден для этого аккаунта',
+        'toast.refreshingSession': 'Обновление сессии...',
+        'toast.fillAllFields': 'Заполните все поля',
+        'toast.enterCode': 'Введите код',
+        'toast.dataCopied': 'Данные скопированы в буфер обмена. Вставьте в Excel через Ctrl+V',
+        'toast.copyError': 'Ошибка копирования',
+        'toast.fillProxyFields': 'Заполните название и адрес прокси',
+        'toast.enterGroupName': 'Введите название группы',
+        'toast.accountAdded': 'Аккаунт добавлен!',
+        'toast.unknownError': 'Неизвестная ошибка',
+        'toast.balanceError': 'Не удалось получить баланс',
+        'toast.settingsSaved': 'Настройки сохранены',
+        'toast.groupCreated': 'Группа создана',
+        'toast.accountRemoved': 'Аккаунт удалён',
+        'toast.sessionRefreshed': 'Сессия обновлена',
+        'toast.authError': 'Ошибка авторизации',
+        'toast.confirmationAccepted': 'Подтверждение принято',
+        'toast.confirmationDenied': 'Подтверждение отклонено',
+        'toast.allConfirmationsAccepted': 'Все подтверждения приняты',
+        'toast.confirmationsError': 'Ошибка при принятии подтверждений',
+        'toast.tradeAccepted': 'Трейд принят',
+        'toast.tradeDeclined': 'Трейд отклонён',
+        'toast.listingCancelled': 'Листинг отменён',
+
+        // Подтверждения
+        'confirm.removeAccount': 'Удалить аккаунт',
+
+        // Шаги добавления аккаунта
+        'step.authorization': 'Шаг 1: Авторизация',
+        'step.emailCode': 'Шаг 2: Код с почты',
+        'step.guardCode': 'Шаг 3: Код Steam Guard',
+        'step.accountAdded': 'Аккаунт добавлен!',
+        'step.confirm': 'Подтвердить',
+        'step.connect': 'Подключить',
+
+        // Экспорт
+        'export.headers.login': 'Логин',
+        'export.headers.password': 'Пароль',
+        'export.headers.steamId': 'Steam ID',
+        'export.headers.rcode': 'Rcode',
+        'export.headers.balance': 'Баланс',
+
+        // Тултипы
+        'tooltip.balance': 'Баланс аккаунта',
+        'tooltip.copyCode': 'Копировать код',
+        'tooltip.edit': 'Редактировать',
+        'tooltip.activate': 'Активировать',
+        'tooltip.deactivate': 'Деактивировать',
+        'tooltip.delete': 'Удалить',
     },
     en: {
         // Main screen
@@ -265,6 +314,55 @@ const translations = {
         'toast.saved': 'Saved',
         'toast.error': 'Error',
         'toast.loading': 'Loading...',
+        'toast.steamIdNotFound': 'SteamID not found for this account',
+        'toast.refreshingSession': 'Refreshing session...',
+        'toast.fillAllFields': 'Fill all fields',
+        'toast.enterCode': 'Enter code',
+        'toast.dataCopied': 'Data copied to clipboard. Paste into Excel with Ctrl+V',
+        'toast.copyError': 'Copy error',
+        'toast.fillProxyFields': 'Fill proxy name and address',
+        'toast.enterGroupName': 'Enter group name',
+        'toast.accountAdded': 'Account added!',
+        'toast.unknownError': 'Unknown error',
+        'toast.balanceError': 'Failed to get balance',
+        'toast.settingsSaved': 'Settings saved',
+        'toast.groupCreated': 'Group created',
+        'toast.accountRemoved': 'Account removed',
+        'toast.sessionRefreshed': 'Session refreshed',
+        'toast.authError': 'Authentication error',
+        'toast.confirmationAccepted': 'Confirmation accepted',
+        'toast.confirmationDenied': 'Confirmation denied',
+        'toast.allConfirmationsAccepted': 'All confirmations accepted',
+        'toast.confirmationsError': 'Error accepting confirmations',
+        'toast.tradeAccepted': 'Trade accepted',
+        'toast.tradeDeclined': 'Trade declined',
+        'toast.listingCancelled': 'Listing cancelled',
+
+        // Confirmations
+        'confirm.removeAccount': 'Remove account',
+
+        // Add account steps
+        'step.authorization': 'Step 1: Authorization',
+        'step.emailCode': 'Step 2: Email Code',
+        'step.guardCode': 'Step 3: Steam Guard Code',
+        'step.accountAdded': 'Account added!',
+        'step.confirm': 'Confirm',
+        'step.connect': 'Connect',
+
+        // Export
+        'export.headers.login': 'Login',
+        'export.headers.password': 'Password',
+        'export.headers.steamId': 'Steam ID',
+        'export.headers.rcode': 'Rcode',
+        'export.headers.balance': 'Balance',
+
+        // Tooltips
+        'tooltip.balance': 'Account balance',
+        'tooltip.copyCode': 'Copy code',
+        'tooltip.edit': 'Edit',
+        'tooltip.activate': 'Activate',
+        'tooltip.deactivate': 'Deactivate',
+        'tooltip.delete': 'Delete',
     }
 };
 

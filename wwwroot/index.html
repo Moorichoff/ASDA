@@ -3026,12 +3026,12 @@
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                             </svg>
                         </button>
-                        <button class="action-btn wallet-btn" data-account="${account.username}" data-tooltip="Баланс аккаунта">
+                        <button class="action-btn wallet-btn" data-account="${account.username}" data-tooltip="${t('tooltip.balance')}">
                             <svg viewBox="0 0 24 24">
                                 <text x="12" y="20" text-anchor="middle" font-size="24" font-weight="bold">$</text>
                             </svg>
                         </button>
-                        <button class="action-btn copy-btn" data-account="${account.username}" data-tooltip="Копировать код">
+                        <button class="action-btn copy-btn" data-account="${account.username}" data-tooltip="${t('tooltip.copyCode')}">
                             <svg viewBox="0 0 24 24">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
@@ -3113,7 +3113,7 @@
                     url: url
                 });
             } else {
-                showToast('SteamID не найден для этого аккаунта');
+                showToast(t('toast.steamIdNotFound'));
             }
         }
 
@@ -3166,13 +3166,13 @@
                         type: 'RefreshSession',
                         accountName: contextMenuAccount
                     });
-                    showToast('Обновление сессии...');
+                    showToast(t('toast.refreshingSession'));
                     break;
                 case 'profile':
                     openProfile(contextMenuAccount);
                     break;
                 case 'remove':
-                    if (confirm(`Удалить аккаунт "${contextMenuAccount}"?`)) {
+                    if (confirm(`${t('confirm.removeAccount')} "${contextMenuAccount}"?`)) {
                         window.chrome.webview.postMessage({
                             type: 'RemoveAccount',
                             accountName: contextMenuAccount
@@ -3232,11 +3232,11 @@
             // Заполняем прокси через кастомный select
             const proxies = data.proxies || [];
             console.log('Proxies received:', proxies);
-            const proxyOptions = ['Без прокси', ...proxies.filter(p => p && p.name).map(p => p.name)];
+            const proxyOptions = [t('modal.account.noProxy'), ...proxies.filter(p => p && p.name).map(p => p.name)];
             console.log('Proxy options:', proxyOptions);
 
             // Находим название прокси по адресу
-            let currentProxyName = 'Без прокси';
+            let currentProxyName = t('modal.account.noProxy');
             if (account.proxy) {
                 const foundProxy = proxies.find(p => p.address === account.proxy);
                 if (foundProxy) {
@@ -3267,7 +3267,7 @@
 
             // Находим адрес прокси по имени
             let proxyValue = '';
-            if (selectedProxyName !== 'Без прокси') {
+            if (selectedProxyName !== t('modal.account.noProxy')) {
                 const proxy = currentProxiesForAccount.find(p => p.name === selectedProxyName);
                 if (proxy) {
                     proxyValue = proxy.address;
@@ -3340,8 +3340,8 @@
             document.getElementById('add-account-step-email').style.display = 'none';
             document.getElementById('add-account-step-guard').style.display = 'none';
             document.getElementById('add-account-step-revocation').style.display = 'none';
-            document.getElementById('add-account-step').textContent = 'Шаг 1: Авторизация';
-            document.getElementById('add-account-next-btn').textContent = 'Далее';
+            document.getElementById('add-account-step').textContent = t('step.authorization');
+            document.getElementById('add-account-next-btn').textContent = t('btn.next');
 
             // Очищаем поля
             document.getElementById('add-account-login').value = '';
@@ -3367,7 +3367,7 @@
                 addAccountData.group = getCustomSelectValue('add-account-group-select', 'add-account-group-text');
 
                 if (!addAccountData.login || !addAccountData.password) {
-                    showToast('Заполните все поля');
+                    showToast(t('toast.fillAllFields'));
                     return;
                 }
 
@@ -3384,7 +3384,7 @@
                 // Отправляем код с почты для авторизации
                 const code = document.getElementById('add-account-email-code').value;
                 if (!code) {
-                    showToast('Введите код');
+                    showToast(t('toast.enterCode'));
                     return;
                 }
 
@@ -3399,7 +3399,7 @@
                 // Отправляем код для Steam Guard
                 const code = document.getElementById('add-account-guard-code').value;
                 if (!code) {
-                    showToast('Введите код');
+                    showToast(t('toast.enterCode'));
                     return;
                 }
 
@@ -3432,14 +3432,14 @@
             document.getElementById('add-account-step-revocation').style.display = step === 4 ? 'block' : 'none';
 
             if (step === 2) {
-                document.getElementById('add-account-step').textContent = 'Шаг 2: Код с почты';
-                document.getElementById('add-account-next-btn').textContent = 'Подтвердить';
+                document.getElementById('add-account-step').textContent = t('step.emailCode');
+                document.getElementById('add-account-next-btn').textContent = t('step.confirm');
             } else if (step === 3) {
-                document.getElementById('add-account-step').textContent = 'Шаг 3: Код Steam Guard';
-                document.getElementById('add-account-next-btn').textContent = 'Подключить';
+                document.getElementById('add-account-step').textContent = t('step.guardCode');
+                document.getElementById('add-account-next-btn').textContent = t('step.connect');
             } else if (step === 4) {
-                document.getElementById('add-account-step').textContent = 'Аккаунт добавлен!';
-                document.getElementById('add-account-next-btn').textContent = 'Закрыть';
+                document.getElementById('add-account-step').textContent = t('step.accountAdded');
+                document.getElementById('add-account-next-btn').textContent = t('btn.close');
             }
         }
 
@@ -3509,7 +3509,7 @@
 
         function exportToExcel() {
             // Формируем CSV данные с нужными полями
-            const headers = ['Логин', 'Пароль', 'Steam ID', 'Rcode', 'Баланс'];
+            const headers = [t('export.headers.login'), t('export.headers.password'), t('export.headers.steamId'), t('export.headers.rcode'), t('export.headers.balance')];
             const rows = allAccounts.map(acc => [
                 acc.username || '',
                 acc.password || '',
@@ -3526,9 +3526,9 @@
 
             // Копируем в буфер обмена
             navigator.clipboard.writeText(csv).then(() => {
-                showToast('Данные скопированы в буфер обмена. Вставьте в Excel через Ctrl+V');
+                showToast(t('toast.dataCopied'));
             }).catch(err => {
-                showToast('Ошибка копирования: ' + err.message);
+                showToast(t('toast.copyError') + ': ' + err.message);
             });
         }
 
@@ -3564,20 +3564,20 @@
                         <div class="proxy-address">${p.address}</div>
                     </div>
                     <div class="proxy-actions">
-                        <button class="proxy-btn edit" onclick="editProxy(${index})" title="Редактировать">
+                        <button class="proxy-btn edit" onclick="editProxy(${index})" title="${t('tooltip.edit')}">
                             <svg viewBox="0 0 24 24">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
                         </button>
-                        <button class="proxy-btn activate" onclick="toggleProxy(${index})" title="${p.isActive ? 'Деактивировать' : 'Активировать'}">
+                        <button class="proxy-btn activate" onclick="toggleProxy(${index})" title="${p.isActive ? t('tooltip.deactivate') : t('tooltip.activate')}">
                             <svg viewBox="0 0 24 24">
                                 ${p.isActive
                                     ? '<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>'
                                     : '<circle cx="12" cy="12" r="10"/>'}
                             </svg>
                         </button>
-                        <button class="proxy-btn delete" onclick="removeProxy(${index})" title="Удалить">
+                        <button class="proxy-btn delete" onclick="removeProxy(${index})" title="${t('tooltip.delete')}">
                             <svg viewBox="0 0 24 24">
                                 <line x1="18" y1="6" x2="6" y2="18"/>
                                 <line x1="6" y1="6" x2="18" y2="18"/>
@@ -3603,7 +3603,7 @@
             const password = document.getElementById('proxy-password').value.trim();
 
             if (!name || !address) {
-                showToast('Заполните название и адрес прокси');
+                showToast(t('toast.fillProxyFields'));
                 return;
             }
 
@@ -3666,7 +3666,7 @@
         function createGroupSubmit() {
             const groupName = document.getElementById('create-group-name').value.trim();
             if (!groupName) {
-                showToast('Введите название группы');
+                showToast(t('toast.enterGroupName'));
                 return;
             }
 
@@ -3733,11 +3733,11 @@
             }
 
             if (type === 'AccountAdded') {
-                showToast(data.message || 'Аккаунт добавлен!');
+                showToast(data.message || t('toast.accountAdded'));
             }
 
             if (type === 'Error') {
-                showToast('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                showToast(t('toast.error') + ': ' + (data.message || t('toast.unknownError')));
                 // Снимаем загрузку со всех кнопок при ошибке
                 document.querySelectorAll('.modal-btn.loading').forEach(btn => {
                     setButtonLoading(btn, false);
@@ -3788,7 +3788,7 @@
             }
 
             if (type === 'AccountSettingsSaved') {
-                showToast(data.message || 'Настройки сохранены');
+                showToast(data.message || t('toast.settingsSaved'));
                 closeModal('modal-account-settings');
             }
 
@@ -3815,7 +3815,7 @@
             }
 
             if (type === 'GroupCreated') {
-                showToast('Группа создана: ' + data.groupName);
+                showToast(t('toast.groupCreated') + ': ' + data.groupName);
                 // Обновляем группы из SettingsManager
                 updateGroupFilter();
             }
@@ -3825,7 +3825,7 @@
             }
 
             if (type === 'SettingsSaved') {
-                showToast(data.message || 'Настройки сохранены');
+                showToast(data.message || t('toast.settingsSaved'));
                 closeModal('modal-settings');
             }
 
@@ -3834,11 +3834,11 @@
             }
 
             if (type === 'AccountRemoved') {
-                showToast(data.message || 'Аккаунт удалён');
+                showToast(data.message || t('toast.accountRemoved'));
             }
 
             if (type === 'SessionRefreshed') {
-                showToast(data.message || 'Сессия обновлена');
+                showToast(data.message || t('toast.sessionRefreshed'));
             }
 
             if (type === 'RequestPassword') {
@@ -3856,7 +3856,7 @@
             }
 
             if (type === 'PasswordError') {
-                showToast(data.message || 'Ошибка авторизации');
+                showToast(data.message || t('toast.authError'));
                 const btn = document.getElementById('password-submit-btn');
                 setButtonLoading(btn, false);
                 // Модалка остаётся открытой для повторного ввода
@@ -3867,17 +3867,17 @@
             }
 
             if (type === 'ConfirmationAccepted') {
-                showToast('Подтверждение принято');
+                showToast(t('toast.confirmationAccepted'));
                 window.chrome.webview.postMessage({ type: 'RefreshConfirmations' });
             }
 
             if (type === 'ConfirmationDenied') {
-                showToast('Подтверждение отклонено');
+                showToast(t('toast.confirmationDenied'));
                 window.chrome.webview.postMessage({ type: 'RefreshConfirmations' });
             }
 
             if (type === 'ConfirmationsAccepted') {
-                showToast(data.success ? 'Все подтверждения приняты' : 'Ошибка при принятии подтверждений');
+                showToast(data.success ? t('toast.allConfirmationsAccepted') : t('toast.confirmationsError'));
                 window.chrome.webview.postMessage({ type: 'RefreshConfirmations' });
             }
 
@@ -3886,12 +3886,12 @@
             }
 
             if (type === 'TradeAccepted') {
-                showToast('Трежд принят');
+                showToast(t('toast.tradeAccepted'));
                 window.chrome.webview.postMessage({ type: 'RefreshTrades' });
             }
 
             if (type === 'TradeDeclined') {
-                showToast('Трежд отклонён');
+                showToast(t('toast.tradeDeclined'));
                 window.chrome.webview.postMessage({ type: 'RefreshTrades' });
             }
 
@@ -3900,7 +3900,7 @@
             }
 
             if (type === 'ListingCancelled') {
-                showToast('Листинг отменён');
+                showToast(t('toast.listingCancelled'));
                 window.chrome.webview.postMessage({ type: 'RefreshMarket' });
             }
         });
