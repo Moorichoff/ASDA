@@ -135,6 +135,14 @@
             100% { transform: scale(1); }
         }
 
+        @keyframes bounce {
+            0% { transform: scale(1) translateY(0); }
+            25% { transform: scale(1.01) translateY(-1px); }
+            50% { transform: scale(0.995) translateY(0); }
+            75% { transform: scale(1.002) translateY(-0.3px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -1671,7 +1679,7 @@
     <div class="anim-area">
         <canvas id="animCanvas"></canvas>
         <div class="anim-content">
-            <div class="center-code" id="center-code">XCD2A</div>
+            <div class="center-code" id="center-code">IDDQD</div>
         </div>
 
         <!-- Accounts Panel -->
@@ -1944,8 +1952,8 @@
                         </div>
                     </div>
                     <div class="modal-checkbox">
-                        <input type="checkbox" id="settings-auto-2fa">
-                        <label for="settings-auto-2fa">Автоматический ввод 2FA кода</label>
+                        <input type="checkbox" id="settings-hide-logins">
+                        <label for="settings-hide-logins">Скрывать логины (показывать только первые и последние символы)</label>
                     </div>
                 </div>
 
@@ -2298,6 +2306,7 @@
 
         // Main animation loop
         let lastTime = 0;
+        let lastProgress = 1;
 
         function animate(timestamp) {
             const dt = timestamp - lastTime;
@@ -2319,6 +2328,26 @@
                     progress = (elapsed - 29000) / 1000;
                 }
             }
+
+            // Detect timer reset (progress jumped from low to high)
+            if (lastProgress < 0.1 && progress > 0.9) {
+                // Timer reset - trigger bounce animation on canvas and code
+                const canvas = document.getElementById('animCanvas');
+                const codeEl = document.getElementById('center-code');
+                if (canvas) {
+                    canvas.style.animation = 'none';
+                    setTimeout(() => {
+                        canvas.style.animation = 'bounce 0.3s ease-out';
+                    }, 10);
+                }
+                if (codeEl) {
+                    codeEl.style.animation = 'none';
+                    setTimeout(() => {
+                        codeEl.style.animation = 'bounce 0.3s ease-out';
+                    }, 10);
+                }
+            }
+            lastProgress = progress;
 
             // Background glow (first, behind everything)
             const frameColor = getFrameColor(progress);
@@ -2932,7 +2961,7 @@
                             </svg>
                         </button>
                         <div class="account-info">
-                            <div class="account-name">${account.username}</div>
+                            <div class="account-name">${maskLogin(account.username)}</div>
                             <div class="account-group">${account.group}</div>
                         </div>
                     </div>
@@ -2954,7 +2983,7 @@
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                             </svg>
                         </button>
-                        <button class="action-btn wallet-btn" data-account="${account.username}" data-tooltip="Баланс кошелька">
+                        <button class="action-btn wallet-btn" data-account="${account.username}" data-tooltip="Баланс аккаунта">
                             <svg viewBox="0 0 24 24">
                                 <text x="12" y="20" text-anchor="middle" font-size="24" font-weight="bold">$</text>
                             </svg>
@@ -3377,8 +3406,9 @@
                 setCustomSelect('settings-default-group-select', 'settings-default-group-text', 'settings-default-group-dropdown', data.groups, data.defaultGroup);
             }
 
-            // Set checkbox values
-            document.getElementById('settings-auto-2fa').checked = data.auto2FA || false;
+            // Загружаем настройку скрытия логинов из данных
+            hideLogins = data.hideLogins || false;
+            document.getElementById('settings-hide-logins').checked = hideLogins;
 
             // Render proxies
             renderProxies(data.proxies || []);
@@ -3389,6 +3419,12 @@
         function saveSettings() {
             const btn = event.target;
             setButtonLoading(btn, true);
+
+            // Сохраняем настройку скрытия логинов
+            hideLogins = document.getElementById('settings-hide-logins').checked;
+
+            // Перерисовываем список аккаунтов с новой настройкой
+            renderAccounts(allAccounts);
 
             console.log('currentProxies before filter:', currentProxies);
             const proxies = currentProxies
@@ -3406,15 +3442,13 @@
             window.chrome.webview.postMessage({
                 type: 'SaveSettings',
                 defaultGroup: getCustomSelectValue('settings-default-group-select', 'settings-default-group-text'),
-                auto2FA: document.getElementById('settings-auto-2fa').checked,
+                hideLogins: hideLogins,
                 proxies: proxies
             });
 
-            // Снимаем загрузку и закрываем модалку через 500ms
-            setTimeout(() => {
-                setButtonLoading(btn, false);
-                closeModal('modal-settings');
-            }, 500);
+            // Снимаем загрузку и закрываем модалку
+            setButtonLoading(btn, false);
+            closeModal('modal-settings');
         }
 
         function exportToExcel() {
@@ -3443,6 +3477,17 @@
         }
 
         let currentProxies = [];
+        let hideLogins = false; // Настройка скрытия логинов
+
+        function maskLogin(username) {
+            if (!hideLogins || username.length <= 4) {
+                return username;
+            }
+            const first = username.substring(0, 2);
+            const last = username.substring(username.length - 2);
+            const middle = '*'.repeat(Math.min(username.length - 4, 6));
+            return first + middle + last;
+        }
 
         function renderProxies(proxies) {
             currentProxies = proxies;
@@ -3612,6 +3657,9 @@
 
             if (type === 'UpdateAccounts') {
                 allAccounts = data.accounts || [];
+                if (data.hideLogins !== undefined) {
+                    hideLogins = data.hideLogins;
+                }
                 if (!currentAccount && allAccounts.length > 0) {
                     currentAccount = allAccounts[0];
                 }

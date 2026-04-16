@@ -403,7 +403,10 @@ namespace SteamGuard
                 balance = a.Balance
             }).ToList();
 
-            SendToJS("UpdateAccounts", new { accounts = accountsData });
+            SendToJS("UpdateAccounts", new {
+                accounts = accountsData,
+                hideLogins = _settingsManager.Settings.HideLogins
+            });
         }
 
         private void SwitchAccount(string accountName)
@@ -1331,6 +1334,7 @@ namespace SteamGuard
                 defaultGroup = _settingsManager.Settings.DefaultGroup,
                 groups = groups,
                 auto2FA = _settingsManager.Settings.Auto2FA,
+                hideLogins = _settingsManager.Settings.HideLogins,
                 proxies = _settingsManager.Settings.Proxies.Select(p => new
                 {
                     name = p.Name ?? "",
@@ -1350,11 +1354,11 @@ namespace SteamGuard
             try
             {
                 string defaultGroup = message["defaultGroup"]?.ToString() ?? "";
-                bool auto2FA = Convert.ToBoolean(message["auto2FA"] ?? false);
+                bool hideLogins = Convert.ToBoolean(message["hideLogins"] ?? false);
 
                 // Обновляем все настройки перед сохранением
                 _settingsManager.Settings.DefaultGroup = defaultGroup;
-                _settingsManager.Settings.Auto2FA = auto2FA;
+                _settingsManager.Settings.HideLogins = hideLogins;
 
                 // Handle proxies
                 if (message.TryGetValue("proxies", out var proxiesObj) && proxiesObj != null)

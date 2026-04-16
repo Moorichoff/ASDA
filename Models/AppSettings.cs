@@ -19,6 +19,11 @@ namespace SteamGuard
         public bool Auto2FA { get; set; } = false;
 
         /// <summary>
+        /// Скрывать логины (показывать только первые и последние символы)
+        /// </summary>
+        public bool HideLogins { get; set; } = false;
+
+        /// <summary>
         /// Глобальный прокси (применяется ко всем аккаунтам без своего прокси)
         /// </summary>
         public string? GlobalProxy { get; set; } = null;
@@ -72,7 +77,9 @@ namespace SteamGuard
 
         public SettingsManager(string settingsFile = "app_settings.json")
         {
-            _settingsFile = settingsFile;
+            // Сохраняем рядом с exe файлом
+            var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+            _settingsFile = Path.Combine(exeDir, settingsFile);
             _settings = LoadSettings();
         }
 
