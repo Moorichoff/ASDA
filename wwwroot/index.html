@@ -2762,32 +2762,61 @@
             select.classList.toggle('open');
         }
 
-        function setCustomSelect(selectId, textId, dropdownId, groups, selectedValue) {
+        function setCustomSelect(selectId, textId, dropdownId, items, selectedValue) {
             const dropdown = document.getElementById(dropdownId);
             const text = document.getElementById(textId);
 
-            // Remove duplicates
-            const uniqueGroups = [...new Set(groups)];
+            // Проверяем, это массив объектов или строк
+            const isObjectArray = items.length > 0 && typeof items[0] === 'object' && items[0].value !== undefined;
 
             dropdown.innerHTML = '';
-            text.textContent = selectedValue;
 
-            uniqueGroups.forEach(group => {
-                const option = document.createElement('div');
-                option.className = 'custom-select-option' + (group === selectedValue ? ' selected' : '');
-                option.textContent = group;
-                option.onclick = () => {
-                    text.textContent = group;
-                    document.getElementById(selectId).classList.remove('open');
-                    dropdown.querySelectorAll('.custom-select-option').forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                };
-                dropdown.appendChild(option);
-            });
+            if (isObjectArray) {
+                // Работаем с объектами {value, label}
+                const selectedItem = items.find(item => item.value === selectedValue);
+                text.textContent = selectedItem ? selectedItem.label : items[0].label;
+                text.dataset.value = selectedValue || items[0].value;
+
+                items.forEach(item => {
+                    const option = document.createElement('div');
+                    option.className = 'custom-select-option' + (item.value === selectedValue ? ' selected' : '');
+                    option.textContent = item.label;
+                    option.dataset.value = item.value;
+                    option.onclick = () => {
+                        text.textContent = item.label;
+                        text.dataset.value = item.value;
+                        document.getElementById(selectId).classList.remove('open');
+                        dropdown.querySelectorAll('.custom-select-option').forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                    };
+                    dropdown.appendChild(option);
+                });
+            } else {
+                // Работаем со строками (старая логика)
+                const uniqueItems = [...new Set(items)];
+                text.textContent = selectedValue;
+                text.dataset.value = selectedValue;
+
+                uniqueItems.forEach(item => {
+                    const option = document.createElement('div');
+                    option.className = 'custom-select-option' + (item === selectedValue ? ' selected' : '');
+                    option.textContent = item;
+                    option.dataset.value = item;
+                    option.onclick = () => {
+                        text.textContent = item;
+                        text.dataset.value = item;
+                        document.getElementById(selectId).classList.remove('open');
+                        dropdown.querySelectorAll('.custom-select-option').forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                    };
+                    dropdown.appendChild(option);
+                });
+            }
         }
 
         function getCustomSelectValue(selectId, textId) {
-            return document.getElementById(textId).textContent;
+            const text = document.getElementById(textId);
+            return text.dataset.value || text.textContent;
         }
 
         function closeAllCustomSelects() {
@@ -3444,7 +3473,7 @@
             hideLogins = document.getElementById('settings-hide-logins').checked;
 
             // Получаем выбранный язык
-            const language = getCustomSelectValue('settings-language-select', 'settings-language-text') === 'English' ? 'en' : 'ru';
+            const language = getCustomSelectValue('settings-language-select', 'settings-language-text');
 
             // Применяем язык
             setLanguage(language);
