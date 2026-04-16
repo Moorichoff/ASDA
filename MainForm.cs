@@ -186,7 +186,7 @@ namespace SteamGuard
                             {
                                 _accountManager.AddAccount(account);
                                 UpdateAccountsList();
-                                SendToJS("AccountAdded", new { message = "Аккаунт добавлен!" });
+                                SendToJS("AccountAdded", new { });
                             }
                         }
                         break;
@@ -565,7 +565,7 @@ namespace SteamGuard
                 {
                     _accountManager.AddAccount(maFileData);
                     UpdateAccountsList();
-                    SendToJS("AccountAdded", new { message = "Аккаунт импортирован!" });
+                    SendToJS("AccountAdded", new { });
                 }
             }
             catch (Exception ex)
@@ -593,7 +593,7 @@ namespace SteamGuard
                 var account = _accountManager.Accounts.FirstOrDefault(a => a.Username == accountName);
                 if (account == null)
                 {
-                    SendToJS("WalletBalanceError", new { accountName, message = "Аккаунт не найден" });
+                    SendToJS("WalletBalanceError", new { accountName });
                     return;
                 }
 
@@ -651,7 +651,7 @@ namespace SteamGuard
                         // Нет пароля - показываем модалку
                         _pendingLoginAccount = accountName;
                         _pendingLoginForWallet = true;
-                        SendToJS("RequestPassword", new { accountName, message = "Введите пароль для получения баланса" });
+                        SendToJS("RequestPassword", new { accountName });
                         return;
                     }
                     else
@@ -703,7 +703,7 @@ namespace SteamGuard
                     catch (Exception refreshEx)
                     {
                         AppLogger.Error($"Не удалось обновить сессию и получить подтверждения: {refreshEx.Message}");
-                        SendToJS("Error", new { message = "Не удалось обновить сессию" });
+                        SendToJS("Error", new { });
                     }
                 }
                 else
@@ -818,7 +818,7 @@ namespace SteamGuard
                 }
                 else
                 {
-                    SendToJS("Error", new { message = "Не удалось принять трейд" });
+                    SendToJS("Error", new { });
                 }
             }
             catch (Exception ex)
@@ -840,7 +840,7 @@ namespace SteamGuard
                 }
                 else
                 {
-                    SendToJS("Error", new { message = "Не удалось отклонить трейд" });
+                    SendToJS("Error", new { });
                 }
             }
             catch (Exception ex)
@@ -862,7 +862,7 @@ namespace SteamGuard
                 }
                 else
                 {
-                    SendToJS("Error", new { message = "Не удалось отменить листинг" });
+                    SendToJS("Error", new { });
                 }
             }
             catch (Exception ex)
@@ -1005,7 +1005,7 @@ namespace SteamGuard
                 _autoConfirmationService?.Stop();
                 _autoConfirmationService?.Start();
 
-                SendToJS("AccountSettingsSaved", new { success = true, message = "Настройки сохранены" });
+                SendToJS("AccountSettingsSaved", new { success = true });
             }
             catch (Exception ex)
             {
@@ -1038,7 +1038,7 @@ namespace SteamGuard
 
                 if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
                 {
-                    SendToJS("Error", new { message = "Логин и пароль не могут быть пустыми" });
+                    SendToJS("Error", new { });
                     return;
                 }
 
@@ -1060,7 +1060,7 @@ namespace SteamGuard
                 // Запрашиваем код с почты или email
                 if (needsEmailCode || confirmType == (int)AuthConfirmationType.EmailCode || confirmType == (int)AuthConfirmationType.EmailConfirmation)
                 {
-                    SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                    SendToJS("RequestEmailCode", new { });
                 }
                 else
                 {
@@ -1126,11 +1126,11 @@ namespace SteamGuard
                     };
 
                     // Запрашиваем код подтверждения
-                    SendToJS("RequestGuardCode", new { message = "Введите код подтверждения (SMS или Email)" });
+                    SendToJS("RequestGuardCode", new { });
                 }
                 else
                 {
-                    SendToJS("Error", new { message = "Ошибка: нет данных для авторизации" });
+                    SendToJS("Error", new { });
                 }
             }
             catch (Exception ex)
@@ -1151,7 +1151,7 @@ namespace SteamGuard
 
                 if (_accountLinker == null || _newAccountAuthData == null)
                 {
-                    SendToJS("Error", new { message = "Ошибка: нет данных аутентификатора" });
+                    SendToJS("Error", new { });
                     return;
                 }
 
@@ -1216,14 +1216,14 @@ namespace SteamGuard
 
                 if (string.IsNullOrEmpty(_pendingLoginAccount))
                 {
-                    SendToJS("Error", new { message = "Ошибка: нет аккаунта для авторизации" });
+                    SendToJS("Error", new { });
                     return;
                 }
 
                 var account = _accountManager.Accounts.FirstOrDefault(a => a.Username == _pendingLoginAccount);
                 if (account == null)
                 {
-                    SendToJS("Error", new { message = "Аккаунт не найден" });
+                    SendToJS("Error", new { });
                     _pendingLoginAccount = null;
                     return;
                 }
@@ -1260,13 +1260,13 @@ namespace SteamGuard
                         // Если авторизация была для баланса - запрашиваем баланс
                         _pendingLoginForWallet = false;
                         _pendingLoginAccount = null;
-                        SendToJS("PasswordSuccess", new { message = "" }); // Пустое сообщение, чтобы закрыть модалку
+                        SendToJS("PasswordSuccess", new { }); // Пустое сообщение, чтобы закрыть модалку
                         await GetWalletBalance(account.Username);
                     }
                     else
                     {
                         // Обычное обновление сессии - показываем уведомление
-                        SendToJS("PasswordSuccess", new { message = "Сессия обновлена и пароль сохранён" });
+                        SendToJS("PasswordSuccess", new { });
                         _pendingLoginAccount = null;
                     }
                 }
@@ -1275,7 +1275,7 @@ namespace SteamGuard
                     if (loginResult.NeedsEmailCode)
                     {
                         // Нужен код с почты
-                        SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                        SendToJS("RequestEmailCode", new { });
                     }
                     else
                     {
@@ -1325,7 +1325,7 @@ namespace SteamGuard
                 string groupName = message["groupName"]?.ToString() ?? "";
                 if (string.IsNullOrWhiteSpace(groupName))
                 {
-                    SendToJS("Error", new { message = "Название группы не может быть пустым" });
+                    SendToJS("Error", new { });
                     return;
                 }
 
@@ -1405,7 +1405,7 @@ namespace SteamGuard
                 // Обновляем список аккаунтов чтобы индикаторы прокси обновились
                 UpdateAccountsList();
 
-                SendToJS("SettingsSaved", new { success = true, message = "Настройки сохранены" });
+                SendToJS("SettingsSaved", new { success = true });
             }
             catch (Exception ex)
             {
@@ -1453,7 +1453,7 @@ namespace SteamGuard
 
                 UpdateAccountsList();
                 SendGroupsToJS();
-                SendToJS("AccountRemoved", new { message = "Аккаунт удалён" });
+                SendToJS("AccountRemoved", new { });
             }
         }
 
@@ -1481,7 +1481,7 @@ namespace SteamGuard
                         }
                         else
                         {
-                            SendToJS("SessionRefreshed", new { message = "Сессия обновлена" });
+                            SendToJS("SessionRefreshed", new { });
                         }
                         return;
                     }
@@ -1516,21 +1516,21 @@ namespace SteamGuard
                         }
                         else
                         {
-                            SendToJS("SessionRefreshed", new { message = "Сессия обновлена" });
+                            SendToJS("SessionRefreshed", new { });
                         }
                     }
                     else if (loginResult.NeedsEmailCode)
                     {
                         // Нужен код с почты - показываем модалку
                         _pendingLoginAccount = accountName;
-                        SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                        SendToJS("RequestEmailCode", new { });
                     }
                     else if (loginResult.Error == "Нет пароля для авторизации" || string.IsNullOrEmpty(account.Password))
                     {
                         // Запрашиваем пароль через модалку
                         _pendingLoginAccount = accountName;
                         _pendingLoginForWallet = silentForWallet;
-                        SendToJS("RequestPassword", new { accountName, message = "Введите пароль для авторизации" });
+                        SendToJS("RequestPassword", new { accountName });
                     }
                     else
                     {
@@ -1603,7 +1603,7 @@ namespace SteamGuard
                     // Нужен код с почты - показываем модалку
                     _pendingLoginAccount = accountName;
                     _pendingLoginForWallet = true;
-                    SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                    SendToJS("RequestEmailCode", new { });
                 }
                 else
                 {
@@ -1657,7 +1657,7 @@ namespace SteamGuard
                     account.HasSession = true;
                     _accountManager.SaveAccountSettings(account);
                     UpdateAccountsList();
-                    SendToJS("SessionRefreshed", new { message = "Сессия обновлена" });
+                    SendToJS("SessionRefreshed", new { });
                 }
                 else
                 {

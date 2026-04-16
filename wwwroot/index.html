@@ -1764,7 +1764,8 @@
             <div class="modal-title" data-i18n="modal.account.title">Настройки аккаунта</div>
             <div class="modal-field">
                 <label data-i18n="modal.account.username">Аккаунт</label>
-                <input type="text" id="acc-settings-username" readonly>
+                <div class="revocation-code" id="acc-settings-username" onclick="copyAccountUsername()" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;"></div>
+                <div class="modal-warning" data-i18n="modal.addAccount.clickToCopy">Нажмите на код, чтобы скопировать</div>
             </div>
             <div class="modal-checkbox">
                 <input type="checkbox" id="acc-settings-auto-trade">
@@ -2667,21 +2668,21 @@
             const item = document.querySelector(`[data-id="${tradeId}"]`);
             if (item) item.style.opacity = '0.5';
             window.chrome.webview.postMessage({ type: 'AcceptTrade', tradeId: tradeId });
-            showToast('Принятие трейда...');
+            showToast(t('toast.tradeAccepting'));
         }
 
         function declineTrade(tradeId) {
             const item = document.querySelector(`[data-id="${tradeId}"]`);
             if (item) item.style.opacity = '0.5';
             window.chrome.webview.postMessage({ type: 'DeclineTrade', tradeId: tradeId });
-            showToast('Отклонение трейда...');
+            showToast(t('toast.tradeDeclining'));
         }
 
         function cancelTrade(tradeId) {
             const item = document.querySelector(`[data-id="${tradeId}"]`);
             if (item) item.style.opacity = '0.5';
             window.chrome.webview.postMessage({ type: 'DeclineTrade', tradeId: tradeId });
-            showToast('Отмена трейда...');
+            showToast(t('toast.tradeCancelling'));
         }
 
         // ===== MARKET =====
@@ -2701,7 +2702,7 @@
             const item = document.querySelector(`[data-id="${listingId}"]`);
             if (item) item.style.opacity = '0.5';
             window.chrome.webview.postMessage({ type: 'CancelListing', listingId: listingId });
-            showToast('Отмена листинга...');
+            showToast(t('toast.listingCancelling'));
         }
 
         // ===== MODALS =====
@@ -2718,8 +2719,16 @@
             const codeEl = document.getElementById('acc-settings-revocation-code') || document.getElementById('add-account-revocation-code');
             if (codeEl) {
                 const code = codeEl.textContent;
-                navigator.clipboard.writeText(code).then(() => showToast('R-код скопирован'));
+                navigator.clipboard.writeText(code).then(() => showToast(t('toast.rcodeCopied')));
                 window.chrome.webview.postMessage({ type: 'CopyRevocationCode', code: code });
+            }
+        }
+
+        function copyAccountUsername() {
+            const usernameEl = document.getElementById('acc-settings-username');
+            if (usernameEl && usernameEl.textContent) {
+                const username = usernameEl.textContent;
+                navigator.clipboard.writeText(username).then(() => showToast(t('toast.usernameCopied') + ': ' + username));
             }
         }
 
@@ -2738,7 +2747,7 @@
         function submitPassword() {
             const password = document.getElementById('password-input').value;
             if (!password) {
-                showToast('Введите пароль');
+                showToast(t('toast.enterPassword'));
                 return;
             }
 
@@ -2847,7 +2856,13 @@
             const circleRadius = Math.min(rect.width, rect.height) * 0.22;
             if (distance <= circleRadius + 40) {
                 const code = centerCode.textContent;
-                navigator.clipboard.writeText(code).then(() => showToast('Скопировано: ' + code));
+                navigator.clipboard.writeText(code).then(() => {
+                    if (code === 'IDDQD') {
+                        showToast('God mode enabled');
+                    } else {
+                        showToast(t('toast.copied') + ': ' + code);
+                    }
+                });
 
                 // Flash entire animation to white
                 flashActive = true;
@@ -3047,7 +3062,7 @@
 
                 item.addEventListener('dblclick', (e) => {
                     if (e.target.closest('.action-btn')) return;
-                    openAccountSettings();
+                    openAccountSettings(account.username);
                 });
 
                 accountsListWrapper.appendChild(item);
@@ -3220,7 +3235,7 @@
             currentSettingsAccount = account.username;
             currentProxiesForAccount = data.proxies || [];
 
-            document.getElementById('acc-settings-username').value = account.username;
+            document.getElementById('acc-settings-username').textContent = account.username;
             document.getElementById('acc-settings-auto-trade').checked = account.autoTrade;
             document.getElementById('acc-settings-auto-market').checked = account.autoMarket;
 
