@@ -1768,11 +1768,11 @@
             </div>
             <div class="modal-checkbox">
                 <input type="checkbox" id="acc-settings-auto-trade">
-                <label for="acc-settings-auto-trade">Автоматическое принятие трейдов</label>
+                <label for="acc-settings-auto-trade" data-i18n="modal.account.autoTrade">Автоматическое принятие трейдов</label>
             </div>
             <div class="modal-checkbox">
                 <input type="checkbox" id="acc-settings-auto-market">
-                <label for="acc-settings-auto-market">Автоматическое принятие маркета</label>
+                <label for="acc-settings-auto-market" data-i18n="modal.account.autoMarket">Автоматическое принятие маркета</label>
             </div>
             <div class="modal-field">
                 <label data-i18n="modal.account.group">Группа</label>
@@ -1801,7 +1801,7 @@
                         <polyline points="1 20 1 14 7 14"/>
                         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
                     </svg>
-                    Обновить сессию
+                    <span data-i18n="modal.account.refreshSession">Обновить сессию</span>
                 </button>
             </div>
             <div id="acc-settings-revocation" style="display: none;">
@@ -1880,15 +1880,15 @@
     <!-- Modal: Password Input -->
     <div class="modal-overlay" id="modal-password">
         <div class="modal">
-            <div class="modal-title">Требуется пароль</div>
-            <div class="modal-warning" id="password-modal-message">Введите пароль для обновления сессии</div>
+            <div class="modal-title" data-i18n="modal.password.title">Требуется пароль</div>
+            <div class="modal-warning" id="password-modal-message" data-i18n="modal.password.message">Введите пароль для обновления сессии</div>
             <div class="modal-field">
-                <label for="password-input">Пароль</label>
+                <label for="password-input" data-i18n="modal.password.label">Пароль</label>
                 <input type="password" id="password-input" placeholder="Введите пароль">
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-password')">Отмена</button>
-                <button class="modal-btn primary" id="password-submit-btn" onclick="submitPassword()">Войти</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-password')">Отмена</button>
+                <button class="modal-btn primary" id="password-submit-btn" data-i18n="btn.login" onclick="submitPassword()">Войти</button>
             </div>
         </div>
     </div>
@@ -1910,13 +1910,13 @@
     <!-- Modal: Trades -->
     <div class="modal-overlay" id="modal-trades">
         <div class="modal modal-trades">
-            <div class="modal-title">Торговые предложения</div>
+            <div class="modal-title" data-i18n="modal.trades.title">Торговые предложения</div>
             <div class="trades-list" id="trades-list">
                 <!-- Trades will be populated here -->
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-trades')">Закрыть</button>
-                <button class="modal-btn" onclick="refreshTrades()">Обновить</button>
+                <button class="modal-btn" data-i18n="btn.close" onclick="closeModal('modal-trades')">Закрыть</button>
+                <button class="modal-btn" data-i18n="btn.refresh" onclick="refreshTrades()">Обновить</button>
             </div>
         </div>
     </div>
@@ -1924,13 +1924,13 @@
     <!-- Modal: Market -->
     <div class="modal-overlay" id="modal-market">
         <div class="modal modal-market">
-            <div class="modal-title">Маркет</div>
+            <div class="modal-title" data-i18n="modal.market.title">Маркет</div>
             <div class="market-list" id="market-list">
                 <!-- Market listings will be populated here -->
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-market')">Закрыть</button>
-                <button class="modal-btn" onclick="refreshMarket()">Обновить</button>
+                <button class="modal-btn" data-i18n="btn.close" onclick="closeModal('modal-market')">Закрыть</button>
+                <button class="modal-btn" data-i18n="btn.refresh" onclick="refreshMarket()">Обновить</button>
             </div>
         </div>
     </div>
@@ -2001,14 +2001,14 @@
     <!-- Modal: Create Group -->
     <div class="modal-overlay" id="modal-create-group">
         <div class="modal">
-            <div class="modal-title">Создать группу</div>
+            <div class="modal-title" data-i18n="modal.createGroup.title">Создать группу</div>
             <div class="modal-field">
-                <label for="create-group-name">Название группы</label>
-                <input type="text" id="create-group-name" placeholder="Введите название группы">
+                <label for="create-group-name" data-i18n="modal.createGroup.name">Название группы</label>
+                <input type="text" id="create-group-name" data-i18n-placeholder="modal.createGroup.placeholder" placeholder="Введите название группы">
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-create-group')">Отмена</button>
-                <button class="modal-btn primary" onclick="createGroupSubmit()">Создать</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-create-group')">Отмена</button>
+                <button class="modal-btn primary" data-i18n="btn.create" onclick="createGroupSubmit()">Создать</button>
             </div>
         </div>
     </div>
@@ -2016,26 +2016,26 @@
     <!-- Modal: Add Proxy -->
     <div class="modal-overlay" id="modal-add-proxy">
         <div class="modal">
-            <div class="modal-title">Добавить прокси</div>
+            <div class="modal-title" data-i18n="modal.addProxy.title">Добавить прокси</div>
             <div class="modal-field">
-                <label for="proxy-name">Название</label>
-                <input type="text" id="proxy-name" placeholder="Мой прокси">
+                <label for="proxy-name" data-i18n="modal.addProxy.name">Название</label>
+                <input type="text" id="proxy-name" data-i18n-placeholder="modal.addProxy.namePlaceholder" placeholder="Мой прокси">
             </div>
             <div class="modal-field">
-                <label for="proxy-address">Адрес (host:port)</label>
-                <input type="text" id="proxy-address" placeholder="127.0.0.1:8080">
+                <label for="proxy-address" data-i18n="modal.addProxy.address">Адрес (host:port)</label>
+                <input type="text" id="proxy-address" data-i18n-placeholder="modal.addProxy.addressPlaceholder" placeholder="127.0.0.1:8080">
             </div>
             <div class="modal-field">
-                <label for="proxy-username">Логин (необязательно)</label>
-                <input type="text" id="proxy-username" placeholder="user">
+                <label for="proxy-username" data-i18n="modal.addProxy.username">Логин (необязательно)</label>
+                <input type="text" id="proxy-username" data-i18n-placeholder="modal.addProxy.usernamePlaceholder" placeholder="user">
             </div>
             <div class="modal-field">
-                <label for="proxy-password">Пароль (необязательно)</label>
-                <input type="password" id="proxy-password" placeholder="password">
+                <label for="proxy-password" data-i18n="modal.addProxy.password">Пароль (необязательно)</label>
+                <input type="password" id="proxy-password" data-i18n-placeholder="modal.addProxy.passwordPlaceholder" placeholder="password">
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-add-proxy')">Отмена</button>
-                <button class="modal-btn primary" onclick="addProxySubmit()">Добавить</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-add-proxy')">Отмена</button>
+                <button class="modal-btn primary" data-i18n="btn.add" onclick="addProxySubmit()">Добавить</button>
             </div>
         </div>
     </div>
@@ -3928,26 +3928,28 @@
         `;
         document.body.appendChild(tooltip);
 
-        function setupTooltip(element, text) {
+        function setupTooltip(element, textOrKey) {
             element.addEventListener('mouseenter', (e) => {
+                // Проверяем, это ключ перевода или обычный текст
+                const text = element.getAttribute('data-tooltip-key') ? t(element.getAttribute('data-tooltip-key')) : textOrKey;
                 tooltip.textContent = text;
                 tooltip.style.visibility = 'hidden';
                 tooltip.style.opacity = '0';
                 tooltip.style.display = 'block';
-                
+
                 // Force reflow to get dimensions
                 void tooltip.offsetWidth;
-                
+
                 const rect = element.getBoundingClientRect();
                 const tooltipWidth = tooltip.offsetWidth;
                 const viewportWidth = window.innerWidth;
                 const margin = 8;
-                
+
                 // Position above the button
                 let top = rect.top - margin;
                 let left = rect.left + rect.width / 2;
                 let transform = 'translate(-50%, -100%)';
-                
+
                 // Check if centered tooltip would overflow edges
                 if (left + tooltipWidth / 2 > viewportWidth - margin) {
                     // Right overflow - align tooltip right edge to button right edge
@@ -3958,7 +3960,7 @@
                     left = rect.left;
                     transform = 'translate(0%, -100%)';
                 }
-                
+
                 tooltip.style.left = left + 'px';
                 tooltip.style.top = top + 'px';
                 tooltip.style.transform = transform;
@@ -3977,12 +3979,30 @@
         }
 
         // Initialize toolbar button tooltips
-        document.querySelectorAll('.toolbar-btn-add').forEach(btn => setupTooltip(btn, 'Добавить аккаунт'));
-        document.querySelectorAll('.toolbar-btn-settings').forEach(btn => setupTooltip(btn, 'Настройки'));
-        document.querySelectorAll('.toolbar-btn-create-group').forEach(btn => setupTooltip(btn, 'Создать группу'));
-        document.querySelectorAll('.toolbar-btn-confirmations').forEach(btn => setupTooltip(btn, 'Подтверждения'));
-        document.querySelectorAll('.toolbar-btn-trades').forEach(btn => setupTooltip(btn, 'Торговые предложения'));
-        document.querySelectorAll('.toolbar-btn-market').forEach(btn => setupTooltip(btn, 'Маркет'));
+        document.querySelectorAll('.toolbar-btn-add').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.addAccount');
+            setupTooltip(btn, t('toolbar.addAccount'));
+        });
+        document.querySelectorAll('.toolbar-btn-settings').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.settings');
+            setupTooltip(btn, t('toolbar.settings'));
+        });
+        document.querySelectorAll('.toolbar-btn-create-group').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.createGroup');
+            setupTooltip(btn, t('toolbar.createGroup'));
+        });
+        document.querySelectorAll('.toolbar-btn-confirmations').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.confirmations');
+            setupTooltip(btn, t('toolbar.confirmations'));
+        });
+        document.querySelectorAll('.toolbar-btn-trades').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.trades');
+            setupTooltip(btn, t('toolbar.trades'));
+        });
+        document.querySelectorAll('.toolbar-btn-market').forEach(btn => {
+            btn.setAttribute('data-tooltip-key', 'toolbar.market');
+            setupTooltip(btn, t('toolbar.market'));
+        });
 
         // Indicator tooltips (use same tooltip element but separate setup)
         const indicatorTooltip = document.createElement('div');
