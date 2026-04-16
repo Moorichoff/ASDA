@@ -597,32 +597,30 @@ namespace SteamGuard
                     return;
                 }
 
-                // Проверяем наличие сессии
+                // Шаг 2: Проверяем валидность сессии
+                bool needsSessionRefresh = false;
+
                 if (!account.HasSession)
                 {
-                    SendToJS("WalletBalanceError", new { accountName, message = "Нет активной сессии" });
-                    return;
+                    needsSessionRefresh = true;
+                    AppLogger.Warn($"Нет активной сессии для {accountName}");
                 }
-
-                // Создаём временный WalletService для этого аккаунта
-                using var walletService = new WalletService(account, _settingsManager);
-
-                AppLogger.Info($"Получение баланса для {accountName}...");
-                var walletInfo = await walletService.GetWalletInfoAsync();
-
-                if (walletInfo != null)
+                else
                 {
-                    if (walletInfo.IsSessionExpired)
+                    // Проверяем, не устарела ли сессия
+                    using var walletService = new WalletService(account, _settingsManager);
+                    var walletInfo = await walletService.GetWalletInfoAsync();
+
+                    if (walletInfo != null && walletInfo.IsSessionExpired)
                     {
-                        AppLogger.Warn($"Сессия устарела для {accountName}, запускаем обновление...");
-                        // Автоматически запускаем обновление сессии (silentForWallet = true)
-                        RefreshSession(accountName, silentForWallet: true);
+                        needsSessionRefresh = true;
+                        AppLogger.Warn($"Сессия устарела для {accountName}");
                     }
-                    else
+                    else if (walletInfo != null && !walletInfo.IsSessionExpired)
                     {
+                        // Шаг 7: Сессия валидна - выводим баланс
                         AppLogger.Info($"Баланс получен: {walletInfo.BalanceFormatted}");
 
-                        // Сохраняем баланс в аккаунт (очищаем от ",--" и заменяем "руб" на "₽")
                         var cleanBalance = walletInfo.BalanceFormatted
                             .Replace(",--", "")
                             .Replace(" руб.", "₽")
@@ -640,11 +638,28 @@ namespace SteamGuard
                             currencyCode = walletInfo.CurrencyCode,
                             currencySymbol = walletInfo.CurrencySymbol
                         });
+                        return;
                     }
                 }
-                else
+
+                // Шаг 3: Если сессия не валидна - получаем её
+                if (needsSessionRefresh)
                 {
-                    SendToJS("WalletBalanceError", new { accountName, message = "Не удалось получить баланс" });
+                    // Шаг 4: Проверяем наличие пароля
+                    if (string.IsNullOrEmpty(account.Password))
+                    {
+                        // Нет пароля - показываем модалку
+                        _pendingLoginAccount = accountName;
+                        _pendingLoginForWallet = true;
+                        SendToJS("RequestPassword", new { accountName, message = "Введите пароль для получения баланса" });
+                        return;
+                    }
+                    else
+                    {
+                        // Есть пароль - обновляем сессию в фоне
+                        AppLogger.Info($"Обновление сессии в фоне для {accountName}...");
+                        await RefreshSessionForWallet(accountName);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1445,7 +1460,7 @@ namespace SteamGuard
         /// <summary>
         /// Обновить сессию аккаунта
         /// </summary>
-        private async void RefreshSession(string accountName, bool silentForWallet = false)
+        private async Task RefreshSession(string accountName, bool silentForWallet = false)
         {
             var account = _accountManager.Accounts.FirstOrDefault(a => a.Username == accountName);
             if (account != null)
@@ -1532,6 +1547,75 @@ namespace SteamGuard
         // Аккаунт ожидающий ввода email кода
         private string? _pendingLoginAccount;
         private bool _pendingLoginForWallet; // Флаг что авторизация для получения баланса
+
+        /// <summary>
+        /// Обновить сессию в фоне для получения баланса (когда пароль уже есть)
+        /// </summary>
+        private async Task RefreshSessionForWallet(string accountName)
+        {
+            var account = _accountManager.Accounts.FirstOrDefault(a => a.Username == accountName);
+            if (account == null) return;
+
+            try
+            {
+                // 1. Пробуем через RefreshToken
+                if (await SessionRefreshService.RefreshSessionAsync(account))
+                {
+                    account.HasSession = true;
+                    _accountManager.SaveAccountSettings(account);
+                    UpdateAccountsList();
+                    AppLogger.Info($"Сессия обновлена через RefreshToken для {accountName}");
+
+                    // Шаг 7: Получаем баланс после успешного обновления сессии
+                    await GetWalletBalance(accountName);
+                    return;
+                }
+
+                // 2. Если нет RefreshToken - пробуем полную авторизацию с паролем
+                var loginResult = await SessionLoginService.FullLoginAsync(
+                    account.Username,
+                    account.Password ?? "",
+                    account.SharedSecret
+                );
+
+                if (loginResult.Success)
+                {
+                    // Шаг 6: Сохраняем сессию в аккаунт
+                    account.Session = new MaFileSession
+                    {
+                        AccessToken = loginResult.AccessToken ?? "",
+                        RefreshToken = loginResult.RefreshToken ?? "",
+                        SteamLoginSecure = loginResult.SteamLoginSecure ?? "",
+                        SessionId = loginResult.SessionId ?? "",
+                        SteamId = (long)loginResult.SteamId
+                    };
+                    account.SteamId = (long)loginResult.SteamId;
+                    account.HasSession = true;
+                    _accountManager.SaveAccountSettings(account);
+                    UpdateAccountsList();
+                    AppLogger.Info($"Сессия успешно обновлена для {accountName}");
+
+                    // Шаг 7: Получаем баланс после успешного обновления сессии
+                    await GetWalletBalance(accountName);
+                }
+                else if (loginResult.NeedsEmailCode)
+                {
+                    // Нужен код с почты - показываем модалку
+                    _pendingLoginAccount = accountName;
+                    _pendingLoginForWallet = true;
+                    SendToJS("RequestEmailCode", new { message = "Введите код с почты" });
+                }
+                else
+                {
+                    SendToJS("WalletBalanceError", new { accountName, message = loginResult.Error ?? "Ошибка авторизации" });
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error($"Ошибка обновления сессии для {accountName}", ex);
+                SendToJS("WalletBalanceError", new { accountName, message = ex.Message });
+            }
+        }
 
         // Данные для добавления нового аккаунта
         private SteamGuardEnrollment? _accountLinker;

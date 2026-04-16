@@ -37,10 +37,8 @@ namespace SteamGuard
                 // Проверяем авторизацию
                 if (response.Contains("g_AccountID = 0") || response.Contains("\"logged_in\":false") || response.Contains("login/?"))
                 {
-                    AppLogger.Warn("Сессия не авторизована на Store");
-
-                    // Пробуем через Community Market
-                    return await GetWalletInfoFromMarketAsync();
+                    AppLogger.Warn("Сессия не авторизована на Store - сессия устарела");
+                    return new WalletInfo { IsSessionExpired = true };
                 }
 
                 // Парсим баланс из Store
@@ -91,7 +89,8 @@ namespace SteamGuard
             catch (Exception ex)
             {
                 AppLogger.Error("Ошибка получения баланса кошелька", ex);
-                return null;
+                // При любой ошибке считаем что сессия устарела
+                return new WalletInfo { IsSessionExpired = true };
             }
         }
 
