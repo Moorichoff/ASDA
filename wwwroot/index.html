@@ -1656,6 +1656,7 @@
             margin: 4px 0;
         }
     </style>
+    <script src="i18n.js"></script>
 </head>
 <body>
     <!-- Title Bar -->
@@ -1760,9 +1761,9 @@
     <!-- Modal: Account Settings -->
     <div class="modal-overlay" id="modal-account-settings">
         <div class="modal">
-            <div class="modal-title">Настройки аккаунта</div>
+            <div class="modal-title" data-i18n="modal.account.title">Настройки аккаунта</div>
             <div class="modal-field">
-                <label>Аккаунт</label>
+                <label data-i18n="modal.account.username">Аккаунт</label>
                 <input type="text" id="acc-settings-username" readonly>
             </div>
             <div class="modal-checkbox">
@@ -1774,7 +1775,7 @@
                 <label for="acc-settings-auto-market">Автоматическое принятие маркета</label>
             </div>
             <div class="modal-field">
-                <label>Группа</label>
+                <label data-i18n="modal.account.group">Группа</label>
                 <div class="custom-select modal-select" id="acc-settings-group-select">
                     <div class="custom-select-trigger" onclick="toggleCustomSelect('acc-settings-group-select')">
                         <span id="acc-settings-group-text"></span>
@@ -1784,10 +1785,10 @@
                 </div>
             </div>
             <div class="modal-field">
-                <label>Прокси</label>
+                <label data-i18n="modal.account.proxy">Прокси</label>
                 <div class="custom-select modal-select" id="acc-settings-proxy-select">
                     <div class="custom-select-trigger" onclick="toggleCustomSelect('acc-settings-proxy-select')">
-                        <span id="acc-settings-proxy-text">Без прокси</span>
+                        <span id="acc-settings-proxy-text" data-i18n="modal.account.noProxy">Без прокси</span>
                         <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="custom-select-dropdown" id="acc-settings-proxy-dropdown"></div>
@@ -1805,14 +1806,14 @@
             </div>
             <div id="acc-settings-revocation" style="display: none;">
                 <div class="modal-field">
-                    <label>R-код (код восстановления)</label>
+                    <label data-i18n="modal.account.revocationCode">R-код (код восстановления)</label>
                     <div class="revocation-code" id="acc-settings-revocation-code" onclick="copyRevocationCode()"></div>
                     <div class="modal-warning">Нажмите на код, чтобы скопировать</div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-account-settings')">Отмена</button>
-                <button class="modal-btn primary" onclick="saveAccountSettings()">Сохранить</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-account-settings')">Отмена</button>
+                <button class="modal-btn primary" data-i18n="btn.save" onclick="saveAccountSettings()">Сохранить</button>
             </div>
         </div>
     </div>
@@ -1820,21 +1821,21 @@
     <!-- Modal: Add Account -->
     <div class="modal-overlay" id="modal-add-account">
         <div class="modal">
-            <div class="modal-title">Добавить аккаунт</div>
+            <div class="modal-title" data-i18n="modal.addAccount.title">Добавить аккаунт</div>
             <div class="modal-step" id="add-account-step">Шаг 1: Авторизация</div>
-            
+
             <!-- Step 1: Login -->
             <div id="add-account-step-login">
                 <div class="modal-field">
-                    <label for="add-account-login">Логин</label>
+                    <label for="add-account-login" data-i18n="modal.addAccount.username">Логин</label>
                     <input type="text" id="add-account-login" placeholder="Введите логин Steam">
                 </div>
                 <div class="modal-field">
-                    <label for="add-account-password">Пароль</label>
+                    <label for="add-account-password" data-i18n="modal.addAccount.password">Пароль</label>
                     <input type="password" id="add-account-password" placeholder="Введите пароль">
                 </div>
                 <div class="modal-field">
-                    <label>Группа</label>
+                    <label data-i18n="modal.addAccount.group">Группа</label>
                     <div class="custom-select modal-select" id="add-account-group-select">
                         <div class="custom-select-trigger" onclick="toggleCustomSelect('add-account-group-select')">
                             <span id="add-account-group-text"></span>
@@ -1848,7 +1849,7 @@
             <!-- Step 2: Email Code for Auth -->
             <div id="add-account-step-email" style="display: none;">
                 <div class="modal-field">
-                    <label for="add-account-email-code">Код с почты</label>
+                    <label for="add-account-email-code" data-i18n="modal.addAccount.emailCode">Код с почты</label>
                     <input type="text" id="add-account-email-code" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
                 </div>
                 <div class="modal-warning">Введите код подтверждения из электронной почты</div>
@@ -1870,7 +1871,7 @@
             </div>
 
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-add-account')">Отмена</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-add-account')">Отмена</button>
                 <button class="modal-btn primary" id="add-account-next-btn" onclick="addAccountNext()">Далее</button>
             </div>
         </div>
@@ -1895,13 +1896,13 @@
     <!-- Modal: Confirmations -->
     <div class="modal-overlay" id="modal-confirmations">
         <div class="modal modal-confirmations">
-            <div class="modal-title">Подтверждения</div>
+            <div class="modal-title" data-i18n="modal.confirmations.title">Подтверждения</div>
             <div class="confirmations-list" id="confirmations-list">
                 <!-- Confirmations will be populated here -->
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-confirmations')">Закрыть</button>
-                <button class="modal-btn primary" id="confirmations-accept-all" onclick="acceptAllConfirmations()">Принять все</button>
+                <button class="modal-btn" data-i18n="btn.close" onclick="closeModal('modal-confirmations')">Закрыть</button>
+                <button class="modal-btn primary" data-i18n="modal.confirmations.acceptAll" id="confirmations-accept-all" onclick="acceptAllConfirmations()">Принять все</button>
             </div>
         </div>
     </div>
@@ -1937,12 +1938,12 @@
     <!-- Modal: Settings -->
     <div class="modal-overlay" id="modal-settings">
         <div class="modal modal-settings">
-            <div class="modal-title">Настройки</div>
+            <div class="modal-title" data-i18n="modal.settings.title">Настройки</div>
             <div class="settings-content">
                 <div class="settings-section">
-                    <div class="settings-section-title">Общие</div>
+                    <div class="settings-section-title" data-i18n="modal.settings.general">Общие</div>
                     <div class="modal-field">
-                        <label>Стандартная группа при добавлении аккаунта</label>
+                        <label data-i18n="modal.settings.defaultGroup">Стандартная группа при добавлении аккаунта</label>
                         <div class="custom-select modal-select" id="settings-default-group-select">
                             <div class="custom-select-trigger" onclick="toggleCustomSelect('settings-default-group-select')">
                                 <span id="settings-default-group-text"></span>
@@ -1951,22 +1952,35 @@
                             <div class="custom-select-dropdown" id="settings-default-group-dropdown"></div>
                         </div>
                     </div>
+                    <div class="modal-field">
+                        <label data-i18n="modal.settings.language">Язык интерфейса</label>
+                        <div class="custom-select modal-select" id="settings-language-select">
+                            <div class="custom-select-trigger" onclick="toggleCustomSelect('settings-language-select')">
+                                <span id="settings-language-text">Русский</span>
+                                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="custom-select-dropdown" id="settings-language-dropdown">
+                                <div class="custom-select-option" data-value="ru">Русский</div>
+                                <div class="custom-select-option" data-value="en">English</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="modal-checkbox">
                         <input type="checkbox" id="settings-hide-logins">
-                        <label for="settings-hide-logins">Скрывать логины (показывать только первые и последние символы)</label>
+                        <label for="settings-hide-logins" data-i18n="modal.settings.hideLogins">Скрывать логины (показывать только первые и последние символы)</label>
                     </div>
                 </div>
 
                 <div class="settings-section">
-                    <div class="settings-section-title">Экспорт данных</div>
+                    <div class="settings-section-title" data-i18n="modal.settings.export">Экспорт данных</div>
                     <div class="modal-field">
-                        <button class="modal-btn" onclick="exportToExcel()" style="width: 100%;">Экспортировать в Excel</button>
+                        <button class="modal-btn" data-i18n="btn.export" onclick="exportToExcel()" style="width: 100%;">Экспортировать в Excel</button>
                     </div>
                 </div>
 
                 <div class="settings-section">
                     <div class="settings-section-title">
-                        <span>Прокси</span>
+                        <span data-i18n="modal.settings.proxy">Прокси</span>
                         <button class="settings-add-btn" onclick="showAddProxyDialog()">
                             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         </button>
@@ -1978,8 +1992,8 @@
             </div>
 
             <div class="modal-buttons">
-                <button class="modal-btn" onclick="closeModal('modal-settings')">Отмена</button>
-                <button class="modal-btn primary" onclick="saveSettings()">Сохранить</button>
+                <button class="modal-btn" data-i18n="btn.cancel" onclick="closeModal('modal-settings')">Отмена</button>
+                <button class="modal-btn primary" data-i18n="btn.save" onclick="saveSettings()">Сохранить</button>
             </div>
         </div>
     </div>
@@ -3410,6 +3424,12 @@
             hideLogins = data.hideLogins || false;
             document.getElementById('settings-hide-logins').checked = hideLogins;
 
+            // Загружаем язык
+            const language = data.language || 'ru';
+            setCustomSelect('settings-language-select', 'settings-language-text', 'settings-language-dropdown',
+                [{value: 'ru', label: 'Русский'}, {value: 'en', label: 'English'}],
+                language);
+
             // Render proxies
             renderProxies(data.proxies || []);
 
@@ -3422,6 +3442,12 @@
 
             // Сохраняем настройку скрытия логинов
             hideLogins = document.getElementById('settings-hide-logins').checked;
+
+            // Получаем выбранный язык
+            const language = getCustomSelectValue('settings-language-select', 'settings-language-text') === 'English' ? 'en' : 'ru';
+
+            // Применяем язык
+            setLanguage(language);
 
             // Перерисовываем список аккаунтов с новой настройкой
             renderAccounts(allAccounts);
@@ -3443,6 +3469,7 @@
                 type: 'SaveSettings',
                 defaultGroup: getCustomSelectValue('settings-default-group-select', 'settings-default-group-text'),
                 hideLogins: hideLogins,
+                language: language,
                 proxies: proxies
             });
 
@@ -3659,6 +3686,9 @@
                 allAccounts = data.accounts || [];
                 if (data.hideLogins !== undefined) {
                     hideLogins = data.hideLogins;
+                }
+                if (data.language !== undefined) {
+                    initLanguage(data.language);
                 }
                 if (!currentAccount && allAccounts.length > 0) {
                     currentAccount = allAccounts[0];

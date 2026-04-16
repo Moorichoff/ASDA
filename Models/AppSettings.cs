@@ -24,6 +24,11 @@ namespace SteamGuard
         public bool HideLogins { get; set; } = false;
 
         /// <summary>
+        /// Язык интерфейса (ru, en)
+        /// </summary>
+        public string Language { get; set; } = "ru";
+
+        /// <summary>
         /// Обязательное использование прокси (блокировать запросы если прокси недоступен)
         /// По умолчанию TRUE для безопасности - если настроен прокси, запросы без него блокируются
         /// </summary>

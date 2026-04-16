@@ -405,7 +405,8 @@ namespace SteamGuard
 
             SendToJS("UpdateAccounts", new {
                 accounts = accountsData,
-                hideLogins = _settingsManager.Settings.HideLogins
+                hideLogins = _settingsManager.Settings.HideLogins,
+                language = _settingsManager.Settings.Language
             });
         }
 
@@ -1335,6 +1336,7 @@ namespace SteamGuard
                 groups = groups,
                 auto2FA = _settingsManager.Settings.Auto2FA,
                 hideLogins = _settingsManager.Settings.HideLogins,
+                language = _settingsManager.Settings.Language,
                 proxies = _settingsManager.Settings.Proxies.Select(p => new
                 {
                     name = p.Name ?? "",
@@ -1355,10 +1357,12 @@ namespace SteamGuard
             {
                 string defaultGroup = message["defaultGroup"]?.ToString() ?? "";
                 bool hideLogins = Convert.ToBoolean(message["hideLogins"] ?? false);
+                string language = message["language"]?.ToString() ?? "ru";
 
                 // Обновляем все настройки перед сохранением
                 _settingsManager.Settings.DefaultGroup = defaultGroup;
                 _settingsManager.Settings.HideLogins = hideLogins;
+                _settingsManager.Settings.Language = language;
 
                 // Handle proxies
                 if (message.TryGetValue("proxies", out var proxiesObj) && proxiesObj != null)
