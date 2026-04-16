@@ -1689,7 +1689,7 @@
             <div class="toolbar">
                 <div class="custom-select" id="group-filter-select">
                     <div class="custom-select-trigger" onclick="toggleGroupFilter()">
-                        <span id="group-filter-text">Все группы</span>
+                        <span id="group-filter-text" data-i18n="groups.all">Все группы</span>
                         <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
                     <div class="custom-select-dropdown" id="group-filter-dropdown"></div>
@@ -1858,7 +1858,7 @@
             <!-- Step 3: Guard Code -->
             <div id="add-account-step-guard" style="display: none;">
                 <div class="modal-field">
-                    <label for="add-account-guard-code">Код Steam Guard</label>
+                    <label for="add-account-guard-code" data-i18n="modal.addAccount.guardCode">Код Steam Guard</label>
                     <input type="text" id="add-account-guard-code" data-i18n-placeholder="modal.addAccount.guardCodePlaceholder" placeholder="Введите код из письма" maxlength="20" autocomplete="off">
                 </div>
                 <div class="modal-warning" data-i18n="modal.addAccount.guardWarning">Введите код для подключения Steam Guard</div>
@@ -2610,10 +2610,10 @@
             const now = Date.now() / 1000;
             const diff = now - timestamp;
             
-            if (diff < 60) return 'Только что';
-            if (diff < 3600) return Math.floor(diff / 60) + ' мин. назад';
-            if (diff < 86400) return Math.floor(diff / 3600) + ' ч. назад';
-            return Math.floor(diff / 86400) + ' дн. назад';
+            if (diff < 60) return t('time.justNow');
+            if (diff < 3600) return Math.floor(diff / 60) + ' ' + t('time.minutesAgo');
+            if (diff < 86400) return Math.floor(diff / 3600) + ' ' + t('time.hoursAgo');
+            return Math.floor(diff / 86400) + ' ' + t('time.daysAgo');
         }
 
         function acceptConfirmation(id) {
@@ -2728,7 +2728,7 @@
 
         function showPasswordModal(accountName, message) {
             pendingPasswordAccount = accountName;
-            document.getElementById('password-modal-message').textContent = message || 'Введите пароль для обновления сессии';
+            document.getElementById('password-modal-message').textContent = message || t('modal.password.message');
             document.getElementById('password-input').value = '';
             openModal('modal-password');
             // Фокус на поле ввода
@@ -2929,7 +2929,7 @@
             // Опция "Все группы"
             const allOption = document.createElement('div');
             allOption.className = 'custom-select-option' + (selectedGroup === '' ? ' selected' : '');
-            allOption.textContent = 'Все группы';
+            allOption.textContent = t('groups.all');
             allOption.onclick = () => selectGroup('');
             dropdown.appendChild(allOption);
 
@@ -2942,7 +2942,7 @@
             });
 
             // Обновляем текст триггера
-            document.getElementById('group-filter-text').textContent = selectedGroup || 'Все группы';
+            document.getElementById('group-filter-text').textContent = selectedGroup || t('groups.all');
         }
 
         function toggleGroupFilter() {
@@ -2952,12 +2952,12 @@
 
         function selectGroup(group) {
             selectedGroup = group;
-            document.getElementById('group-filter-text').textContent = group || 'Все группы';
+            document.getElementById('group-filter-text').textContent = group || t('groups.all');
             document.getElementById('group-filter-select').classList.remove('open');
 
             // Обновляем selected класс
             document.querySelectorAll('#group-filter-dropdown .custom-select-option').forEach(opt => {
-                opt.classList.toggle('selected', opt.textContent === (group || 'Все группы'));
+                opt.classList.toggle('selected', opt.textContent === (group || t('groups.all')));
             });
 
             renderAccounts(allAccounts);
@@ -3009,18 +3009,18 @@
                         </div>
                     </div>
                     <div class="account-indicators">
-                        <span class="indicator auto-trade ${account.autoTrade ? 'active' : 'inactive'}" data-tooltip="Авто трейд"></span>
-                        <span class="indicator auto-market ${account.autoMarket ? 'active' : 'inactive'}" data-tooltip="Авто маркет"></span>
+                        <span class="indicator auto-trade ${account.autoTrade ? 'active' : 'inactive'}" data-tooltip="${t('tooltip.autoTrade')}"></span>
+                        <span class="indicator auto-market ${account.autoMarket ? 'active' : 'inactive'}" data-tooltip="${t('tooltip.autoMarket')}"></span>
                     </div>
                     <div class="account-actions">
-                        <button class="action-btn profile-btn" data-account="${account.username}" data-tooltip="Профиль Steam">
+                        <button class="action-btn profile-btn" data-account="${account.username}" data-tooltip="${t('tooltip.profile')}">
                             <svg viewBox="0 0 24 24">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                                 <polyline points="15 3 21 3 21 9"/>
                                 <line x1="10" y1="14" x2="21" y2="3"/>
                             </svg>
                         </button>
-                        <button class="action-btn settings-btn" data-account="${account.username}" data-tooltip="Настройки аккаунта">
+                        <button class="action-btn settings-btn" data-account="${account.username}" data-tooltip="${t('tooltip.accountSettings')}">
                             <svg viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="3"/>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -3707,7 +3707,7 @@
             if (type === 'CodeGenerated') {
                 const code = data.code;
                 navigator.clipboard.writeText(code).then(() => {
-                    showToast(`Код скопирован: ${code}`);
+                    showToast(`${t('toast.codeCopiedWith')}: ${code}`);
                 });
             }
 
@@ -3772,7 +3772,7 @@
 
             if (type === 'WalletBalanceError') {
                 const accountName = data.accountName || '';
-                const message = data.message || 'Не удалось получить баланс';
+                const message = data.message || t('toast.balanceError');
                 showToast(`❌ ${accountName}: ${message}`);
 
                 // Убираем анимацию загрузки

@@ -91,6 +91,7 @@ const translations = {
         'modal.addAccount.username': 'Логин Steam',
         'modal.addAccount.password': 'Пароль',
         'modal.addAccount.emailCode': 'Код с почты',
+        'modal.addAccount.guardCode': 'Код Steam Guard',
         'modal.addAccount.group': 'Группа',
         'modal.addAccount.step1': 'Шаг 1: Авторизация',
         'modal.addAccount.step2': 'Шаг 2: Код с почты',
@@ -155,6 +156,9 @@ const translations = {
         'toast.tradeAccepted': 'Трейд принят',
         'toast.tradeDeclined': 'Трейд отклонён',
         'toast.listingCancelled': 'Листинг отменён',
+        'toast.codeCopiedWith': 'Код скопирован',
+        'toast.balanceFetched': 'Баланс получен',
+        'toast.balanceFetchError': 'Ошибка получения баланса',
 
         // Подтверждения
         'confirm.removeAccount': 'Удалить аккаунт',
@@ -181,6 +185,16 @@ const translations = {
         'tooltip.activate': 'Активировать',
         'tooltip.deactivate': 'Деактивировать',
         'tooltip.delete': 'Удалить',
+        'tooltip.autoTrade': 'Авто трейд',
+        'tooltip.autoMarket': 'Авто маркет',
+        'tooltip.profile': 'Профиль Steam',
+        'tooltip.accountSettings': 'Настройки аккаунта',
+
+        // Время
+        'time.justNow': 'Только что',
+        'time.minutesAgo': 'мин. назад',
+        'time.hoursAgo': 'ч. назад',
+        'time.daysAgo': 'дн. назад',
     },
     en: {
         // Main screen
@@ -273,6 +287,7 @@ const translations = {
         'modal.addAccount.username': 'Steam Login',
         'modal.addAccount.password': 'Password',
         'modal.addAccount.emailCode': 'Email Code',
+        'modal.addAccount.guardCode': 'Steam Guard Code',
         'modal.addAccount.group': 'Group',
         'modal.addAccount.step1': 'Step 1: Authorization',
         'modal.addAccount.step2': 'Step 2: Email Code',
@@ -337,6 +352,9 @@ const translations = {
         'toast.tradeAccepted': 'Trade accepted',
         'toast.tradeDeclined': 'Trade declined',
         'toast.listingCancelled': 'Listing cancelled',
+        'toast.codeCopiedWith': 'Code copied',
+        'toast.balanceFetched': 'Balance fetched',
+        'toast.balanceFetchError': 'Balance fetch error',
 
         // Confirmations
         'confirm.removeAccount': 'Remove account',
@@ -363,6 +381,16 @@ const translations = {
         'tooltip.activate': 'Activate',
         'tooltip.deactivate': 'Deactivate',
         'tooltip.delete': 'Delete',
+        'tooltip.autoTrade': 'Auto trade',
+        'tooltip.autoMarket': 'Auto market',
+        'tooltip.profile': 'Steam Profile',
+        'tooltip.accountSettings': 'Account settings',
+
+        // Time
+        'time.justNow': 'Just now',
+        'time.minutesAgo': 'min. ago',
+        'time.hoursAgo': 'h. ago',
+        'time.daysAgo': 'd. ago',
     }
 };
 
