@@ -52,7 +52,7 @@ namespace SteamGuard
 
         private void InitializeComponent()
         {
-            this.Text = "";
+            this.Text = "Steam Guard";
             this.Size = new Size(Constants.WindowWidth, Constants.WindowHeight);
             this.MinimumSize = new Size(Constants.WindowWidth, Constants.WindowHeight);
             this.MaximumSize = new Size(Constants.WindowWidth, Constants.WindowHeight);
