@@ -158,32 +158,6 @@ namespace SteamGuard
         }
 
         /// <summary>
-        /// Создать HttpClient для Steam Community API
-        /// </summary>
-        public static HttpClient CreateCommunityClient()
-        {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(Constants.SteamCommunityUrl)
-            };
-            ConfigureDefaultHeaders(client);
-            return client;
-        }
-
-        /// <summary>
-        /// Создать HttpClient для Steam Web API
-        /// </summary>
-        public static HttpClient CreateApiClient()
-        {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(Constants.SteamApiBase)
-            };
-            ConfigureDefaultHeaders(client);
-            return client;
-        }
-
-        /// <summary>
         /// Создать защищенный HttpClient с проверкой прокси перед каждым запросом
         /// </summary>
         public static ProxyProtectedHttpClient CreateProtectedAuthenticatedClient(SteamAccount account, SettingsManager? settingsManager = null)
