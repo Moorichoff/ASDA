@@ -52,7 +52,7 @@ namespace SteamGuard
 
         private void InitializeComponent()
         {
-            this.Text = "Steam Guard";
+            this.Text = "Awakened Steam Desktop Authenticator";
             this.Size = new Size(Constants.WindowWidth, Constants.WindowHeight);
             this.MinimumSize = new Size(Constants.WindowWidth, Constants.WindowHeight);
             this.MaximumSize = new Size(Constants.WindowWidth, Constants.WindowHeight);
